@@ -59,11 +59,19 @@ const handleUpdateUser = async (req, res) => {
         if (validate.success) {
             const updateFields = {
                 firstName, 
-                lastName, 
+                lastName,
                 phoneNumber, 
                 email, 
                 address
             };
+
+            const foundUser = await User.findOne({ email: email });
+            if (foundUser && foundUser._id.toString() !== userId.toString()) {
+                return res.status(409).json({
+                    success: false,
+                    message: "Email Already Exists.",
+                });
+            }
 
             const user = await User.findByIdAndUpdate(userId, { $set: updateFields }, { new: true });
 
@@ -79,9 +87,11 @@ const handleUpdateUser = async (req, res) => {
                 success:true,
                 message:"User Profile Updated Successfully",
                 user:{
-                    firstName:user.firstName,
+                    firstName: user.firstName,
                     lastName:user.lastName,
                     email:user.email,
+                    phoneNumber:user.phoneNumber,
+                    address:user.address,
                     role:user.role,
                 },
                 token

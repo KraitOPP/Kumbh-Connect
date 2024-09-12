@@ -27,7 +27,7 @@ const isAuthenticated = async (req, res, next) => {
       });
     }
 
-    req.body.user = user;
+    req.user = user;
     next();
 
   } catch (error) {
@@ -42,7 +42,7 @@ const isAuthenticated = async (req, res, next) => {
 
 const isAdmin = async (req, res, next) => {
   try {
-    const user = req.body.user;
+    const user = req.user;
 
     if (!user || user.role!=='admin') {
       return res.status(401).json({
