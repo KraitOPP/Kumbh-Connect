@@ -113,14 +113,14 @@ export const LoginPage = () => {
                                 }
                             </Button>
                             <div className="w-full flex justify-end">
-                                <p><Link to={'/user/forget-password'} className="text-sm text-blue-600 text-bold hover:text-blue-800" >Forget Password ?</Link></p>
+                                <p><Link to={'/accounts/forget-password'} className="text-sm text-blue-600 text-bold hover:text-blue-800" >Forget Password ?</Link></p>
                             </div>
                         </div>
                     </form>
                 </Form>
                 <div className='text-center mt-4'>
                     <p>New to Dashboard? {' '}
-                        <Link to={'/user/sign-up'} className='text-blue-600 hover:text-blue-800'>Sign Up</Link>
+                        <Link to={'/accounts/sign-up'} className='text-blue-600 hover:text-blue-800'>Sign Up</Link>
                     </p>
                 </div>
             </div>

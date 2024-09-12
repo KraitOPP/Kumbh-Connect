@@ -63,7 +63,7 @@ export const ForgetPasswordPage = () => {
                 toast({
                     title: "Password Updated Successfully",
                 });
-                navigate('/user/sign-in', { replace: true });
+                navigate('/accounts/sign-in', { replace: true });
             } else {
                 toast({
                     title: "Failed to forget Password",
@@ -198,7 +198,7 @@ export const ForgetPasswordPage = () => {
                 </Form>
                 <div className='text-center mt-4'>
                     <p>New to Dashboard? {' '}
-                        <Link to={'/user/sign-up'} className='text-blue-600 hover:text-blue-800'>Sign Up</Link>
+                        <Link to={'/accounts/sign-up'} className='text-blue-600 hover:text-blue-800'>Sign Up</Link>
                     </p>
                 </div>
             </div>

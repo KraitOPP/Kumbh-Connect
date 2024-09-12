@@ -56,7 +56,7 @@ export const RegisterPage = () => {
                     title: "Registration Successful",
                 });
     
-                navigate('/user/sign-in',{replace:true});
+                navigate('/accounts/sign-in',{replace:true});
             } else {
                 toast({
                     title: "Registration Failed",
@@ -162,7 +162,7 @@ export const RegisterPage = () => {
                 </Form>
                 <div className='text-center mt-4'>
                     <p>Already Registered? {' '}
-                        <Link to={'/user/sign-in'} className='text-blue-600 hover:text-blue-800'>Sign In</Link>
+                        <Link to={'/accounts/sign-in'} className='text-blue-600 hover:text-blue-800'>Sign In</Link>
                     </p>
                 </div>
             </div>
