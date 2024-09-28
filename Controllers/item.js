@@ -1,5 +1,6 @@
+const User = require("../Models/user");
 const Item = require("../Models/item");
-const { z } = require("zod");
+const { z, string } = require("zod");
 
 const itemSchemaValidate = z.object({
     name: z
@@ -17,11 +18,7 @@ const itemSchemaValidate = z.object({
         .regex(/^[0-9a-fA-F]{24}$/, { message: "Invalid Category ObjectId" }),
     images: z.array(
         z.object({
-            url: z
-                .string({ required_error: "Image URL is required" })
-                .regex(/^https?:\/\/(www\.)?[\w\-]+\.[\w\-]+(\/[\w\-.,@?^=%&:/~+#]*)?$/, {
-                    message: "Invalid Image URL.",
-                }),
+            url: z.string({ required_error: "Image URL is required" }),
         }),
     ),
     status: z.enum(['lost', 'found', 'returned'], {
@@ -55,10 +52,16 @@ const itemUpdateSchemaValidate = z.object({
 
 const handleAddItem = async(req,res)=>{
     try {
-        const {name, description, category, images, status, reportedBy} = req.body;
-
+        const {name, description, category, images, status} = req.body;
+        const reportedBy = req.user._id.toString();
         const validate = itemSchemaValidate.safeParse({name, description, category, images, status, reportedBy});
-        
+        const user = await User.findById(reportedBy);
+        if(!user){
+            return res.status(401).json({
+                success: false,
+                message: "Invalid Request",
+            });
+        }
         if(validate.success){
 
             const item = new Item({
@@ -69,8 +72,15 @@ const handleAddItem = async(req,res)=>{
                 status,
                 reportedBy,
             });
-
+            if(status=='lost'){
+                user.lostItems.push(item._id);
+            }
+            else if(status=='found'){
+                user.foundItems.push(item._id);
+            }
             await item.save();
+            await user.save();
+
 
             return res.status(201).json({
                 success: true,
@@ -247,7 +257,7 @@ const handleDeleteItem = async(req,res)=>{
 
 const handleGetItems = async (req,res)=>{
     try {
-        const items = await Item.find({});
+        const items = await Item.find({}).populate("category reportedBy");
 
         if (!items || items.length === 0) {
             return res.status(404).json({

@@ -14,7 +14,7 @@ const categorySchemaValidate = z.object({
         }),
     image: z
         .string({required_error: "Image Url is required"})
-        .regex(/^https?:\/\/(www\.)?[\w\-]+\.[\w\-]+(\/[\w\-.,@?^=%&:/~+#]*)?$/,{message:"Invalid Image Url."}),
+        .regex(/^https?:\/\/(www\.)?[\w\-]+(\.[\w\-]+)+([\/\w\-.,@?^=%&:/~+#]*)?$/i,{message:"Invalid Image Url."}),
 
 });
 

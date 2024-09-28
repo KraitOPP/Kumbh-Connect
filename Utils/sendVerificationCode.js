@@ -23,7 +23,6 @@ const sendMail = async (code,email)=>{
             from:{
                 name:"Mahakumbh Lost and Found",
                 address:process.env.USER,
-                
             }, 
             to: email, 
             subject: "Password Reset Code",
