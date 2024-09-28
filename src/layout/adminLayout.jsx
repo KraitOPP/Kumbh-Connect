@@ -1,7 +1,6 @@
 import {
     CircleUser,
     Home,
-    LayoutDashboard,
     LineChart,
     Menu,
     Package2,
@@ -42,7 +41,7 @@ export default function AdminLayout() {
             });
             navigate('/', { replace: true });
         }
-    }, []);
+    }, [navigate, userInfo, path]);
 
 
     const handleLogout = () => {
@@ -80,26 +79,12 @@ export default function AdminLayout() {
                                 Profile
                             </Link>
                             <Link
-                                to="/admin/dashboard"
-                                className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:text-foreground ${path === '/admin/dashboard' ? 'text-primary' : 'text-muted-foreground'
+                                to="/dashboard"
+                                className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:text-foreground ${path === '/dashboard' ? 'text-primary' : 'text-muted-foreground'
                                     }`}              >
                                 <LineChart className="h-4 w-4" />
                                 Dashboard
                             </Link>
-                            {/* <Link
-                  to="/dashboard"
-                  className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:text-foreground ${path === '/dashboard' ? 'text-primary' : 'text-muted-foreground'
-                  }`}              >
-                 <LineChart className="h-5 w-5" />
-                  Dashboard
-                </Link>
-                <Link
-                  to="/dashboard/items"
-                  className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:text-foreground ${path === '/dashboard/items' ? 'text-primary' : 'text-muted-foreground'
-                  }`}              >
-                  <Package className="h-4 w-4" />
-                  Items{" "}
-                </Link> */}
                         </nav>
                     </div>
                 </div>
@@ -134,22 +119,6 @@ export default function AdminLayout() {
                                     <Home className="h-5 w-5" />
                                     Dashboard
                                 </Link>
-
-                                {/* <Link
-                    to="/dashboard"
-                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:text-foreground ${path === '/dashboard' ? 'text-primary' : 'text-muted-foreground'
-                    }`}
-                  >
-                    <LineChart className="h-5 w-5" />
-                    Dashboard
-                  </Link>
-                  <Link
-                    to="/dashboard/items"
-                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:text-foreground ${path === '/dashboard/items' ? 'text-primary' : 'text-muted-foreground'
-                    }`}                >
-                    <Package className="h-5 w-5" />
-                    Items
-                  </Link> */}
                             </nav>
                         </SheetContent>
                     </Sheet>
@@ -174,7 +143,7 @@ export default function AdminLayout() {
                             <DropdownMenuLabel>
                                 <p className="font-bold text-2xl"> Hi {userInfo?.firstName},</p>
                                 <div className="mt-2 ">
-                                    <Link to={'/admin/dashboard'} >
+                                    <Link to={'/dashboard'} >
                                         <p className="text-sm">View Admin Dashboard</p>
                                     </Link>
                                 </div>

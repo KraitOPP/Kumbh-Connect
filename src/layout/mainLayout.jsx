@@ -26,7 +26,7 @@ import { useEffect } from "react"
 import { useLocation } from 'react-router-dom';
 import { toast } from "@/components/ui/use-toast"
 import { Toaster } from "@/components/ui/toaster"
-
+import icon from '../assets/icon.png';
 
 export default function DashboardLayout() {
 
@@ -56,8 +56,7 @@ export default function DashboardLayout() {
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link to="/" className="flex items-center gap-2 font-semibold">
-              <Package2 className="h-6 w-6" />
-              <span className="">Mahakumbh Lost & Found</span>
+              <span className=""><img src={icon} alt="" /></span>
             </Link>
           </div>
           <div className="flex-1">
@@ -81,7 +80,7 @@ export default function DashboardLayout() {
                     </Link>
                     {userInfo.role === "admin" && (
                       <Link
-                        to="/admin/dashboard"
+                        to="/dashboard"
                         className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:text-foreground ${path === '/admin/dashboard' ? 'text-primary' : 'text-muted-foreground'
                           }`}
                       >
@@ -205,7 +204,7 @@ export default function DashboardLayout() {
                     {
                       userInfo.role == 'admin' ? <>
                         <div className="mt-2 ">
-                          <Link to={'/admin/dashboard'} >
+                          <Link to={'/dashboard'} >
                             <p className="text-sm">View Admin Dashboard</p>
                           </Link>
                         </div>

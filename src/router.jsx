@@ -11,6 +11,8 @@ import Error404Page from './Pages/Error404';
 import { ProfilePage } from './Pages/Profile';
 import AdminLayout from './layout/adminLayout';
 import AdminDashboardPage from './Pages/AdminDashboard';
+import { AddItemCategoryPage } from './Pages/AdminPages/ItemCategory';
+import { ReportItemPage } from './Pages/UserPages/reportItem';
 
 
 export const router = createBrowserRouter([
@@ -37,12 +39,16 @@ export const router = createBrowserRouter([
       ]
     },
     {
-      path:"/admin/",
+      path:"/dashboard/",
       element: <AdminLayout />,
       children:[
         {
-          path: "dashboard",
+          path: "",
           element:<AdminDashboardPage />
+        },
+        {
+          path: "category/add-new",
+          element:<AddItemCategoryPage />
         }
       ]
     },
@@ -57,6 +63,10 @@ export const router = createBrowserRouter([
         {
             path: "/u/profile",
             element: <ProfilePage />
+        },
+        {
+            path: "/report/item",
+            element: <ReportItemPage />
         },
       ]
     },
