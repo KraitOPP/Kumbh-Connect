@@ -15,8 +15,14 @@ const itemsApiSlice = apiSlice.injectEndpoints({
                     method:'GET',
                 })
             }),
+            getUserItem: builder.mutation({
+                query:()=>({
+                    url:'/item/user/',
+                    method:'GET',
+                })
+            }),
         }
     )
 })
 
-export const {useReportItemMutation, useGetItemMutation} = itemsApiSlice;
+export const {useReportItemMutation, useGetItemMutation, useGetUserItemMutation} = itemsApiSlice;
