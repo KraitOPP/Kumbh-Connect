@@ -260,9 +260,10 @@ const handleGetItems = async (req,res)=>{
         const items = await Item.find({}).populate("category reportedBy");
 
         if (!items || items.length === 0) {
-            return res.status(404).json({
-                success: false,
+            return res.status(200).json({
+                success: true,
                 message: "No items found.",
+                items:[],
             });
         }
 
@@ -497,5 +498,32 @@ const handleGetItemsOfACategory = async(req,res)=>{
     }
 } 
 
+const handleGetItemofUser = async (req,res)=>{
+    try {
+        const user = req.user._id;
+        const items = await Item.find({reportedBy: user}).populate("category reportedBy returnedTo");
 
-module.exports = {handleAddItem,handleUpdateItem, handleDeleteItem, handleUpdateItemStatus, handleGetItems, handleGetItemsByCategory, handleGetItemsOfACategory};
+        if (!items || items.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: "No items found.",
+                items:[],
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Items Fetched Successfully",
+            items,
+        });
+
+    } catch (error) {
+        console.error("Error Fetching Items",error);
+        return res.status(500).json({
+            success:false,
+            message: "Internal Server Issue, Please try again!",
+        });
+    }
+}
+
+module.exports = {handleAddItem,handleUpdateItem, handleDeleteItem, handleUpdateItemStatus, handleGetItems, handleGetItemsByCategory, handleGetItemsOfACategory, handleGetItemofUser};
