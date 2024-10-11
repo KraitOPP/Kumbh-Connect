@@ -13,6 +13,8 @@ import AdminLayout from './layout/adminLayout';
 import AdminDashboardPage from './Pages/AdminDashboard';
 import { AddItemCategoryPage } from './Pages/AdminPages/ItemCategory';
 import { ReportItemPage } from './Pages/UserPages/reportItem';
+import CategoryItems from './Pages/CategoryItems';
+import ItemPage from './Pages/Item';
 
 
 export const router = createBrowserRouter([
@@ -63,6 +65,14 @@ export const router = createBrowserRouter([
         {
             path: "/u/profile",
             element: <ProfilePage />
+        },
+        {
+            path: "/category/:categoryId",
+            element: <CategoryItems />
+        },
+        {
+            path: "/item/:itemId",
+            element: <ItemPage />
         },
         {
             path: "/report/item",

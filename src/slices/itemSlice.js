@@ -15,9 +15,21 @@ const itemsApiSlice = apiSlice.injectEndpoints({
                     method:'GET',
                 })
             }),
+            getItemByCategory: builder.mutation({
+                query:(categoryId)=>({
+                    url:`/item/category/${categoryId}`,
+                    method:'GET',
+                })
+            }),
             getUserItem: builder.mutation({
                 query:()=>({
                     url:'/item/user/',
+                    method:'GET',
+                })
+            }),
+            getItemById: builder.mutation({
+                query:(id)=>({
+                    url:`/item/id/${id}`,
                     method:'GET',
                 })
             }),
@@ -25,4 +37,4 @@ const itemsApiSlice = apiSlice.injectEndpoints({
     )
 })
 
-export const {useReportItemMutation, useGetItemMutation, useGetUserItemMutation} = itemsApiSlice;
+export const {useReportItemMutation, useGetItemMutation, useGetItemByCategoryMutation, useGetUserItemMutation, useGetItemByIdMutation} = itemsApiSlice;
