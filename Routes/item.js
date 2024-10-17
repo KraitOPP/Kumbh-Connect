@@ -8,15 +8,17 @@ const {
     handleGetItems,
     handleGetItemsByCategory,
     handleGetItemsOfACategory,
-    handleGetItemofUser
+    handleGetItemofUser,
+    handleGetItemById
 } = require("../Controllers/item");
 
 
+router.get('/id/:id', handleGetItemById);
 router.get('/', handleGetItems);
+router.get('/category/:id', handleGetItemsOfACategory);
 router.get('/category', handleGetItemsByCategory);
 router.get('/user',isAuthenticated, handleGetItemofUser);
-router.get('/category/:id', handleGetItemsOfACategory);
-router.post('/', isAuthenticated, isAdmin, handleAddItem);
+router.post('/', isAuthenticated, handleAddItem);
 router.put('/status/:id', isAuthenticated, isAdmin, handleUpdateItemStatus);
 router.put('/:id', isAuthenticated, isAdmin, handleUpdateItem);
 router.delete('/:id', isAuthenticated, isAdmin, handleDeleteItem);

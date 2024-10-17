@@ -1,6 +1,7 @@
 const User = require("../Models/user");
 const Item = require("../Models/item");
-const { z, string } = require("zod");
+const { z } = require("zod");
+const mongoose = require("mongoose");
 
 const itemSchemaValidate = z.object({
     name: z
@@ -37,6 +38,8 @@ const itemSchemaValidate = z.object({
         .optional(),
 });
 
+const mongooseIdVerify = z.string().regex(/^[0-9a-fA-F]{24}$/, { message: "Invalid ID" });
+
 const itemUpdateSchemaValidate = z.object({
     status: z.enum(['lost', 'found', 'returned'], {
         required_error: "Item Status is required",
@@ -52,7 +55,7 @@ const itemUpdateSchemaValidate = z.object({
 
 const handleAddItem = async(req,res)=>{
     try {
-        const {name, description, category, images, status} = req.body;
+        const {name, description, category, images,location, status} = req.body;
         const reportedBy = req.user._id.toString();
         const validate = itemSchemaValidate.safeParse({name, description, category, images, status, reportedBy});
         const user = await User.findById(reportedBy);
@@ -69,6 +72,7 @@ const handleAddItem = async(req,res)=>{
                 description,
                 category,
                 images,
+                location,
                 status,
                 reportedBy,
             });
@@ -167,12 +171,13 @@ const handleUpdateItem = async (req, res) => {
 
 const handleUpdateItemStatus = async (req, res) => {
     try {
-        const itemId = req.params.id;
+        const id = req.params.id;
 
+        const itemId = mongooseIdVerify.safeParse(id).success ? id : null;
         if (!itemId) {
-            return res.status(400).json({
+            return res.status(404).json({
                 success: false,
-                message: "Invalid Item Id.",
+                message: "Item not Found.",
             });
         }
 
@@ -386,14 +391,16 @@ const handleGetItemsByCategory = async(req,res)=>{
 
 const handleGetItemsOfACategory = async(req,res)=>{
     try {
-        const categoryId = req.params.id;
-
-        if(!categoryId){
-            return res.status(409).json({
+        const id = req.params.id;
+        const _id = mongooseIdVerify.safeParse(id).success ? id : null;
+        if(!_id){
+            return res.status(404).json({
                 success:false,
-                message: "Invalid Category ID!",
+                message: "Category not Found!",
             });
         }
+
+        const categoryId = new mongoose.Types.ObjectId(_id);
 
         const items = await Item.aggregate([
               {
@@ -487,7 +494,8 @@ const handleGetItemsOfACategory = async(req,res)=>{
         return res.status(200).json({
             success: true,
             message: "Items Fetched By Category Successfully",
-            items,
+            items:items[0].items,
+            category:items[0].categoryDetails
         }); 
     } catch (error) {
         console.error("Error Fetching Category Items",error);
@@ -526,4 +534,33 @@ const handleGetItemofUser = async (req,res)=>{
     }
 }
 
-module.exports = {handleAddItem,handleUpdateItem, handleDeleteItem, handleUpdateItemStatus, handleGetItems, handleGetItemsByCategory, handleGetItemsOfACategory, handleGetItemofUser};
+const handleGetItemById = async (req,res)=>{
+    try {
+        const itemId = req.params.id;
+        const item = await Item.findById(itemId).populate("category reportedBy returnedTo");
+
+        if (!item) {
+            return res.status(404).json({
+                success: true,
+                message: "Item not Found.",
+                items:null,
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Item Fetched Successfully",
+            item,
+        });
+
+    } catch (error) {
+        console.error("Error Fetching Items",error);
+        return res.status(500).json({
+            success:false,
+            message: "Internal Server Issue, Please try again!",
+        });
+    }
+}
+
+
+module.exports = {handleAddItem,handleUpdateItem, handleDeleteItem, handleUpdateItemStatus, handleGetItems, handleGetItemsByCategory, handleGetItemsOfACategory, handleGetItemofUser, handleGetItemById};

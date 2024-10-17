@@ -37,25 +37,13 @@ const itemSchema = new mongoose.Schema({
     ref: 'User',
   },
   location: {
-    street: {
-      type: String,
-      trim: true,
+    latitude:{
+        type: Number,
+        required: true,
     },
-    city: {
-      type: String,
-      trim: true,
-    },
-    state: {
-      type: String,
-      trim: true,
-    },
-    country: {
-      type: String,
-      trim: true,
-    },
-    postalCode: {
-      type: String,
-      trim: true,
+    longitude:{
+        type: Number,
+        required: true,
     },
   },
   dateReported: {
