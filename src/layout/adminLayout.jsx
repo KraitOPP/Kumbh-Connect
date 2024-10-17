@@ -96,9 +96,9 @@ import { toast } from "@/components/ui/use-toast"
           </div>
         </div>
         <div className="flex flex-col">
+          <Toaster />
           <Navbar />
           <Outlet />
-          <Toaster />
         </div>
       </div>
     )

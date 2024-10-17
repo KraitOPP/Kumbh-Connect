@@ -133,11 +133,11 @@ export const ProfilePage = () => {
     }
 
     return (
-        <div className="flex flex-col min-h-full bg-gray-100 px-4 py-8 lg:px-24">
+        <div className="flex flex-col  bg-gray-100 px-4 py-8 lg:px-24">
             <div>
                 {isFetching ? (
                     <div className="flex justify-center">
-                        <Loader2 className="animate-spin text-gray-600" size={40} />
+                        <Loader className="animate-spin text-gray-600" size={40} />
                     </div>
                 ) : (
                     <div className="w-full max-w-4xl p-8 space-y-6 bg-white rounded-lg shadow-md mx-auto">

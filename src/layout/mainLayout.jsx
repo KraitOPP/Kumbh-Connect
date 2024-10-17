@@ -92,9 +92,9 @@ export default function DashboardLayout() {
         </div>
       </div>
       <div className="flex flex-col">
+        <Toaster />
         <Navbar />
         <Outlet />
-        <Toaster />
       </div>
     </div>
   )

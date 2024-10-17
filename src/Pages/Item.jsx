@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { useGetItemByIdMutation } from "@/slices/itemSlice";
-import { Loader2 } from "lucide-react";
+import { Loader, Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { useParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import 'react-image-lightbox/style.css';
-import { PhotoProvider, PhotoView } from 'react-photo-view';
 import 'react-photo-view/dist/react-photo-view.css';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
+import MapComponent from "@/components/map";
+import { AspectRatio } from "@/components/ui/aspect-ratio"
+
 
 export default function ItemPage() {
     const [getItemById, { isLoading }] = useGetItemByIdMutation();
     const [item, setItem] = useState(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const [imageLoading, setImageLoading] = useState(true); 
+    const [imageLoading, setImageLoading] = useState(true);
 
     const { itemId } = useParams();
 
@@ -54,7 +56,7 @@ export default function ItemPage() {
     }
 
     const handleThumbnailClick = (index) => {
-        setCurrentImageIndex(index); 
+        setCurrentImageIndex(index);
         setImageLoading(true);
     };
 
@@ -69,7 +71,7 @@ export default function ItemPage() {
                                     <button
                                         key={index}
                                         className="border hover:border-gray-900 rounded-lg overflow-hidden transition-colors dark:hover:border-gray-50"
-                                        onClick={() => handleThumbnailClick(index)} 
+                                        onClick={() => handleThumbnailClick(index)}
                                     >
                                         <img
                                             src={image.url || 'https://g-uociy3gwwd9.vusercontent.net/placeholder.svg'}
@@ -85,20 +87,25 @@ export default function ItemPage() {
                             <div className="grid gap-4 md:gap-10">
                                 {imageLoading && (
                                     <div className="flex justify-center items-center">
-                                        <Loader2 className="animate-spin h-8 w-8 text-gray-500" />
+                                        <Loader className="animate-spin h-8 w-8 text-gray-500" />
                                     </div>
                                 )}
-                                <PhotoView src={item.images[currentImageIndex]?.url || 'https://g-uociy3gwwd9.vusercontent.net/placeholder.svg'}>
-                                    <img
-                                        src={item.images[currentImageIndex]?.url || 'https://g-uociy3gwwd9.vusercontent.net/placeholder.svg'}
-                                        alt="Product Image"
-                                        width={600}
-                                        height={600}
-                                        className={`aspect-square object-cover border border-gray-200 w-full rounded-lg overflow-hidden dark:border-gray-800 ${imageLoading ? 'hidden' : ''}`}
-                                        onLoad={() => setImageLoading(false)}
-                                        onError={() => setImageLoading(false)} 
-                                    />
-                                </PhotoView>
+                                <div className="w-full">
+                                    <PhotoView src={item.images[currentImageIndex]?.url || 'https://g-uociy3gwwd9.vusercontent.net/placeholder.svg'}>
+                                        <AspectRatio >
+                                            <img
+                                                src={item.images[currentImageIndex]?.url || 'https://g-uociy3gwwd9.vusercontent.net/placeholder.svg'}
+                                                alt="Product Image"
+                                                width={600}
+                                                height={600}
+                                                className={`aspect-square object-cover border border-gray-200 w-full rounded-lg overflow-hidden dark:border-gray-800 ${imageLoading ? 'hidden' : ''}`}
+                                                onLoad={() => setImageLoading(false)}
+                                                onError={() => setImageLoading(false)}
+                                            />
+                                        </AspectRatio>
+
+                                    </PhotoView>
+                                </div>
                             </div>
                         </div>
                         <h1 className="font-bold text-3xl lg:text-4xl">{item.name}</h1>
@@ -106,6 +113,7 @@ export default function ItemPage() {
                             {item.category.name || 'Category Not Available'}
                         </div>
                         <h2 className="text-xl">Item Status : <b>{item.status.toUpperCase()}</b></h2>
+
                     </div>
                     <div className="grid gap-4 md:gap-10 items-start">
                         <Tabs defaultValue="description" className="w-full">
@@ -131,9 +139,13 @@ export default function ItemPage() {
                                 <p className="text-gray-500 dark:text-gray-400">
                                     Returned to Owner: {item.returnedToOwner ? 'Yes' : 'No'}
                                 </p>
+                                <div className="w-full h-64 md:h-96">
+                                    <MapComponent latitude={item.location.latitude} longitude={item.location.longitude} />
+                                </div>
                             </TabsContent>
                         </Tabs>
                     </div>
+
                 </div>
             </PhotoProvider>
         </div>

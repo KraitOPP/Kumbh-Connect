@@ -21,8 +21,8 @@ export default function AuthLayout(){
 
     return (
         <>
-            <Outlet />
             <Toaster />
+            <Outlet />
         </>
     )
 }

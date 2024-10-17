@@ -12,7 +12,7 @@ import { ProfilePage } from './Pages/Profile';
 import AdminLayout from './layout/adminLayout';
 import AdminDashboardPage from './Pages/AdminDashboard';
 import { AddItemCategoryPage } from './Pages/AdminPages/ItemCategory';
-import { ReportItemPage } from './Pages/UserPages/reportItem';
+import ReportItemPage  from './Pages/UserPages/reportItem';
 import CategoryItems from './Pages/CategoryItems';
 import ItemPage from './Pages/Item';
 
