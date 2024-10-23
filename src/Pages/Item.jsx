@@ -61,9 +61,9 @@ export default function ItemPage() {
     };
 
     return (
-        <div className="m-5 flex justify-center items-center flex-col gap-5">
+        <div className="m-5 flex justify-center flex-col gap-5">
             <PhotoProvider>
-                <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
+                <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl py-6">
                     <div className="grid gap-3 items-start">
                         <div className="grid gap-3 items-start">
                             <div className="flex gap-4 items-start">
@@ -90,7 +90,7 @@ export default function ItemPage() {
                                         <Loader className="animate-spin h-8 w-8 text-gray-500" />
                                     </div>
                                 )}
-                                <div className="w-full">
+                                <div>
                                     <PhotoView src={item.images[currentImageIndex]?.url || 'https://g-uociy3gwwd9.vusercontent.net/placeholder.svg'}>
                                         <AspectRatio >
                                             <img
@@ -108,12 +108,6 @@ export default function ItemPage() {
                                 </div>
                             </div>
                         </div>
-                        <h1 className="font-bold text-3xl lg:text-4xl">{item.name}</h1>
-                        <div className="text-3xl ml-auto">
-                            {item.category.name || 'Category Not Available'}
-                        </div>
-                        <h2 className="text-xl">Item Status : <b>{item.status.toUpperCase()}</b></h2>
-
                     </div>
                     <div className="grid gap-4 md:gap-10 items-start">
                         <Tabs defaultValue="description" className="w-full">
@@ -123,22 +117,31 @@ export default function ItemPage() {
                                 <TabsTrigger value="status">Status</TabsTrigger>
                             </TabsList>
                             <TabsContent value="description">
+                                <h1 className="font-bold text-2xl lg:text-3xl">{item.name}</h1>
+                                <div className="text-xl ml-auto mt-5">
+                                    {item.category.name || 'Category Not Available'}
+                                </div>
+                                <h2 className="text-xl mb-5">Item Status : <b>{item.status.toUpperCase()}</b></h2>
                                 <p className="text-gray-500 dark:text-gray-400">{item.description}</p>
                             </TabsContent>
                             <TabsContent value="details">
-                                <ul className="text-gray-500 dark:text-gray-400">
-                                    <li><strong>Reported by:</strong> {item.reportedBy?.firstName} {item.reportedBy?.lastName}</li>
-                                    <li><strong>Date Reported:</strong> {new Date(item.dateReported).toLocaleDateString()}</li>
-                                    <li><strong>Category:</strong> {item.category.name}</li>
-                                </ul>
+                                <div>
+                                    <ul className="text-gray-500 dark:text-gray-400">
+                                        <li><strong>Reported by:</strong> {item.reportedBy?.firstName} {item.reportedBy?.lastName}</li>
+                                        <li><strong>Date Reported:</strong> {new Date(item.dateReported).toLocaleDateString()}</li>
+                                        <li><strong>Category:</strong> {item.category.name}</li>
+                                    </ul>
+                                </div>
                             </TabsContent>
                             <TabsContent value="status">
-                                <p className="text-gray-500 dark:text-gray-400">
-                                    Status: {item.status === 'lost' ? 'Lost' : 'Found'}
-                                </p>
-                                <p className="text-gray-500 dark:text-gray-400">
-                                    Returned to Owner: {item.returnedToOwner ? 'Yes' : 'No'}
-                                </p>
+                                <div>
+                                    <p className="text-gray-500 dark:text-gray-400">
+                                        Status: {item.status === 'lost' ? 'Lost' : 'Found'}
+                                    </p>
+                                    <p className="text-gray-500 dark:text-gray-400">
+                                        Returned to Owner: {item.returnedToOwner ? 'Yes' : 'No'}
+                                    </p>
+                                </div>
                                 <div className="w-full h-64 md:h-96">
                                     <MapComponent latitude={item.location.latitude} longitude={item.location.longitude} />
                                 </div>

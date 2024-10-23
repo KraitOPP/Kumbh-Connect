@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,6 +29,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { differenceInDays } from "date-fns";
 
+const saveScrollPosition = () => {
+    window.localStorage.setItem("scrollPosition", window.scrollY);
+};
+
+// Restore the saved scroll position after re-render
+const restoreScrollPosition = () => {
+    const savedPosition = window.localStorage.getItem("scrollPosition");
+    if (savedPosition) {
+        window.scrollTo(0, parseInt(savedPosition, 10));
+    }
+};
+
 
 export default function Items({ items }) {
 
@@ -39,11 +51,23 @@ export default function Items({ items }) {
     });
     const [timeFilter, setTimeFilter] = useState("week");
     const handleFilterChange = (filter) => {
+        saveScrollPosition(); 
         setFilters((prevFilter) => ({
             ...prevFilter,
             [filter]: !prevFilter[filter],
         }));
     };
+
+    const handleTimeFilterChange = (value) => {
+        saveScrollPosition(); 
+        setTimeFilter(value);
+    };
+
+    useEffect(() => {
+        restoreScrollPosition();
+    }, [filters]);
+
+
 
     const filterItems = (items, timeFilter, statusFilters) => {
         const now = new Date();
@@ -69,7 +93,7 @@ export default function Items({ items }) {
         <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-3">
             <Tabs
                 defaultValue="week"
-                onValueChange={(value) => setTimeFilter(value)}
+                onValueChange={(value) => handleTimeFilterChange(value)}
             >
                 <div className="flex items-center">
                     <TabsList>
@@ -121,7 +145,7 @@ export default function Items({ items }) {
                         <CardHeader className="px-7">
                             <CardTitle>Items</CardTitle>
                             <CardDescription>
-                                Recent Lost/Found Items.
+                                Reported Lost/Found Items.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>

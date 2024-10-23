@@ -140,7 +140,7 @@ export const ProfilePage = () => {
                         <Loader className="animate-spin text-gray-600" size={40} />
                     </div>
                 ) : (
-                    <div className="w-full max-w-4xl p-8 space-y-6 bg-white rounded-lg shadow-md mx-auto">
+                    <div className="w-full max-w-7xl p-8 space-y-6 bg-white rounded-lg shadow-md mx-auto">
                         <div className="text-center">
                             <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight mb-6">Your Profile</h1>
                         </div>
