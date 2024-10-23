@@ -26,7 +26,7 @@ const handleAddCategory = async(req,res)=>{
         const validate = categorySchemaValidate.safeParse({name, description, image});
         if(validate.success){
 
-            const foundCategory = await Category.findOne({name:name});
+            const foundCategory = await Category.findOne({name:name}).sort({createdAt:-1});
 
             if(foundCategory){
                 return res.status(409).json({
@@ -154,7 +154,7 @@ const handleDeleteCategory = async(req,res)=>{
 
 const handleGetCategories = async (req,res)=>{
     try {
-        const categories = await Category.find({});
+        const categories = await Category.find({}).sort({createdAt:-1});
 
         if (!categories || categories.length === 0) {
             return res.status(404).json({

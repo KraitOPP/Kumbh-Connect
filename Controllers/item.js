@@ -262,7 +262,7 @@ const handleDeleteItem = async(req,res)=>{
 
 const handleGetItems = async (req,res)=>{
     try {
-        const items = await Item.find({}).populate("category reportedBy");
+        const items = await Item.find({}).populate("category reportedBy").sort({'dateReported': -1});
 
         if (!items || items.length === 0) {
             return res.status(200).json({
@@ -293,6 +293,11 @@ const handleGetItemsByCategory = async(req,res)=>{
             {
                 $addFields:{
                     "reportedBy": { "$toObjectId": "$reportedBy" }
+                }
+            },
+            {
+                $sort:{
+                    "dateReported": -1
                 }
             },
             {
@@ -370,7 +375,7 @@ const handleGetItemsByCategory = async(req,res)=>{
                           $arrayElemAt: ["$categoryDetails",0]
                     }
                 }
-            }
+            },
         ]);
 
         return res.status(200).json({
@@ -411,6 +416,11 @@ const handleGetItemsOfACategory = async(req,res)=>{
               {
                 $addFields:{
                     "reportedBy": { "$toObjectId": "$reportedBy" }
+                }
+            },
+            {
+                $sort:{
+                    "dateReported": -1
                 }
             },
             {
@@ -509,7 +519,7 @@ const handleGetItemsOfACategory = async(req,res)=>{
 const handleGetItemofUser = async (req,res)=>{
     try {
         const user = req.user._id;
-        const items = await Item.find({reportedBy: user}).populate("category reportedBy returnedTo");
+        const items = await Item.find({reportedBy: user}).populate("category reportedBy returnedTo").sort({'dateReported': -1});
 
         if (!items || items.length === 0) {
             return res.status(200).json({
