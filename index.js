@@ -9,6 +9,7 @@ const authRouter = require("./Routes/auth");
 const categoryRouter = require('./Routes/category');
 const ItemRouter = require('./Routes/item');
 const userRouter = require('./Routes/user');
+const claimItemRouter = require('./Routes/claimItem');
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use("/api/auth/",authRouter);
 app.use("/api/user/",userRouter);
 app.use("/api/category/",categoryRouter);
 app.use("/api/item/",ItemRouter);
+app.use("/api/claim/",claimItemRouter);
 
 app.get('/',(req,res)=>{
     return res.send("Server is  Running");
