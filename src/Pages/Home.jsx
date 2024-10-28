@@ -1,110 +1,174 @@
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import {  AlertCircle, Plus, Archive } from "lucide-react";
+import { motion } from "framer-motion";
+import { useGetItemMutation } from "@/slices/itemSlice";
+import { useGetItemCategoryMutation } from "@/slices/categorySlice";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
+import { toast } from "@/components/ui/use-toast";
 import CategoryCard from "@/components/categoryCard";
 import ItemCard from "@/components/ItemCard";
-import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "@/components/ui/use-toast";
-import { useGetItemCategoryMutation } from "@/slices/categorySlice";
-import { useGetItemMutation } from "@/slices/itemSlice";
-import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 
+const ItemSkeleton = () => (
+  <div className="space-y-3">
+    <div className="h-40 bg-gray-200 rounded-lg animate-pulse" />
+    <div className="space-y-2">
+      <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4" />
+      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2" />
+    </div>
+  </div>
+);
+
+const ErrorMessage = ({ message }) => (
+  <Card className="border-red-200 bg-red-50">
+    <CardContent className="p-4 flex items-center gap-2 text-red-600">
+      <AlertCircle className="h-5 w-5" />
+      <p>{message}</p>
+    </CardContent>
+  </Card>
+);
+
+const HeroSection = () => (
+  <Card className="w-full bg-gradient-to-r from-gray-800 to-gray-400 text-white">
+    <CardHeader className="pb-3">
+      <CardTitle className="text-3xl font-bold">Mahakumbh Lost & Found Portal</CardTitle>
+      <CardDescription className="text-gray-100 text-lg">
+        Lost something? Found something? We're here to help reconnect items with their owners.
+      </CardDescription>
+    </CardHeader>
+    <CardFooter className="flex gap-4">
+      <Link to="/report/item">
+        <Button variant="secondary" className="gap-2">
+          <Plus className="h-4 w-4" />
+          Report Item
+        </Button>
+      </Link>
+    </CardFooter>
+  </Card>
+);
 
 export default function HomePage() {
   const [getItem, { isLoading: isFetching }] = useGetItemMutation();
-  const [getCategories, { isLoading: isFetchingCategory }] = useGetItemCategoryMutation
-  ();
+  const [getCategories, { isLoading: isFetchingCategory }] = useGetItemCategoryMutation();
   const [items, setItems] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchItems = async () => {
+    const fetchData = async () => {
       try {
-        const res = await getItem().unwrap();
-        if (res.success) {
-          setItems(res.items);
-        } else {
-          toast({
-            title: "Failed to Load Items",
-            description: res.message,
-            variant: "destructive",
-          });
+        const [itemsRes, categoriesRes] = await Promise.all([
+          getItem().unwrap(),
+          getCategories().unwrap(),
+        ]);
+
+        if (itemsRes.success) {
+          setItems(itemsRes.items);
+        }
+
+        if (categoriesRes.success) {
+          setCategories(categoriesRes.categories);
         }
       } catch (error) {
+        setError(error?.data?.message || "Failed to load content");
         toast({
-          title: "Failed to Load Items",
-          description: error?.data?.message || "An unexpected error occurred.",
-          variant: "destructive",
-        });
-      }
-    };
-    const fetchCategories = async () => {
-      try {
-        const res = await getCategories().unwrap();
-        if (res.success) {
-          setCategories(res.categories);
-        } else {
-          toast({
-            title: "Failed to Load Categories",
-            description: res.message,
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        toast({
-          title: "Failed to Load Categories",
-          description: error?.data?.message || "An unexpected error occurred.",
+          title: "Error",
+          description: "Failed to load content. Please try again later.",
           variant: "destructive",
         });
       }
     };
 
-    fetchItems();
-    fetchCategories();
-  }, []);
+    fetchData();
+  }, [getItem, getCategories]);
 
   return (
-    <div className="m-5  flex justify-center items-center flex-col gap-5">
-      <Card className="sm:col-span-2 w-full" x-chunk="dashboard-05-chunk-0">
-        <CardHeader className="pb-3">
-          <CardTitle>Report Lost/Found Item</CardTitle>
-          <CardDescription className="max-w-lg text-balance leading-relaxed">
-            Lost Something, Report Here.
-            Found Something Help by Reporting here.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Link to={"/report/item"}>
-            <Button>Report</Button>
-          </Link>
-        </CardFooter>
-      </Card>
-      <div className="w-full p-1">
-        <h2 className="text-2xl mb-3">Browse By <b>Category</b></h2>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+        <HeroSection />
+
+        {error && <ErrorMessage message={error} />}
+
+        <section className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Categories</h2>
+          </div>
+          
           {isFetchingCategory ? (
-            <Loader2 className="animate-spin" />
-          ): (
-            <div className="flex gap-1">
-              {categories.length>0 && categories.map((category) => (
-                <Link to={`/category/${category._id}`} key={category._id}><CategoryCard category={category} /></Link>
+            <div className="flex gap-4 overflow-x-auto pb-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="w-48 h-24 bg-gray-200 rounded-lg animate-pulse flex-shrink-0"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {categories.map((category) => (
+                <motion.div
+                  key={category._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Link to={`/category/${category._id}`}>
+                    <CategoryCard category={category} />
+                  </Link>
+                </motion.div>
               ))}
             </div>
           )}
-      </div>
-      <h2 className="text-2xl font-bold w-full text-start">Recent Listings</h2>
-        {isFetching ? (
-          <Loader2 className="animate-spin" />
-        ) : (
-          <div className="items-center grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {items.length > 0 ? <>
-              {items.map((item) => (
-                <ItemCard key={item._id} item={item} />
-              ))}
-            </> : <>
-              <p>No Items Found</p>
-            </>}
+        </section>
+
+        <section className="space-y-4 ">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h2 className="text-2xl font-bold">Recent Listings</h2>
           </div>
-        )}
+
+          {isFetching ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map((i) => (
+                <ItemSkeleton key={i} />
+              ))}
+            </div>
+          ) : items.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {items.map((item) => (
+                <motion.div
+                  key={item._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex justify-center"
+                >
+                  <ItemCard item={item} />
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <Card className="p-8 text-center">
+              <CardContent className="space-y-2">
+                <div className="flex justify-center">
+                  <Archive className="h-12 w-12 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold">No Items Found</h3>
+                <p className="text-gray-500">
+                   No items have been posted yet
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </section>
+      </div>
     </div>
-  )
-}
+  );
+};

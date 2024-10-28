@@ -1,156 +1,202 @@
-import { useEffect, useState } from "react";
-import { useGetItemByIdMutation } from "@/slices/itemSlice";
-import { Loader, Loader2 } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
+import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import 'react-photo-view/dist/react-photo-view.css';
+import { Loader, Loader2, MapPin, User, Calendar, Tag, Check, X } from "lucide-react";
 import { PhotoProvider, PhotoView } from 'react-photo-view';
+import { useGetItemByIdMutation } from "@/slices/itemSlice";
+import { toast } from "@/components/ui/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import MapComponent from "@/components/map";
-import { AspectRatio } from "@/components/ui/aspect-ratio"
+import 'react-photo-view/dist/react-photo-view.css';
 
+const ImageGallery = ({ images, currentIndex, onImageSelect, imageLoading, setImageLoading }) => (
+  <div className="grid gap-4">
+    <div className="flex gap-2 overflow-x-auto pb-2">
+      {images.map((image, index) => (
+        <button
+          key={index}
+          onClick={() => onImageSelect(index)}
+          className={`flex-shrink-0 transition-all duration-200 ${
+            currentIndex === index 
+              ? 'ring-2 ring-blue-500 ring-offset-2'
+              : 'hover:opacity-80'
+          }`}
+        >
+          <img
+            src={image.url || '/api/placeholder/100/100'}
+            alt={`Thumbnail ${index + 1}`}
+            className="h-16 w-16 rounded-lg object-cover"
+          />
+        </button>
+      ))}
+    </div>
 
-export default function ItemPage() {
-    const [getItemById, { isLoading }] = useGetItemByIdMutation();
-    const [item, setItem] = useState(null);
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const [imageLoading, setImageLoading] = useState(true);
+    <div className="relative rounded-lg overflow-hidden bg-gray-100">
+      {imageLoading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+        </div>
+      )}
+      <PhotoView src={images[currentIndex]?.url || '/api/placeholder/600/600'}>
+        <AspectRatio ratio={1}>
+          <img
+            src={images[currentIndex]?.url || '/api/placeholder/600/600'}
+            alt="Main product view"
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              imageLoading ? 'opacity-0' : 'opacity-100'
+            }`}
+            onLoad={() => setImageLoading(false)}
+            onError={() => setImageLoading(false)}
+          />
+        </AspectRatio>
+      </PhotoView>
+    </div>
+  </div>
+);
 
-    const { itemId } = useParams();
+const ItemStatus = ({ status, returnedToOwner }) => (
+  <div className="flex gap-2 items-center">
+    <Badge variant={status === 'lost' ? 'destructive' : 'success'} className="text-sm">
+      {status.toUpperCase()}
+    </Badge>
+    {returnedToOwner ? (
+      <Badge variant="outline" className="gap-1">
+        <Check className="w-3 h-3" /> Returned to Owner
+      </Badge>
+    ) : (
+      <Badge variant="outline" className="gap-1">
+        <X className="w-3 h-3" /> Not Yet Returned
+      </Badge>
+    )}
+  </div>
+);
 
-    useEffect(() => {
-        const fetchItem = async () => {
-            try {
-                const res = await getItemById(itemId).unwrap();
-                if (res.success) {
-                    setItem(res.item);
-                } else {
-                    toast({
-                        title: "Failed to Load Item",
-                        description: res.message,
-                        variant: "destructive",
-                    });
-                }
-            } catch (error) {
-                toast({
-                    title: "Failed to Load Item",
-                    description: error?.data?.message || "An unexpected error occurred.",
-                    variant: "destructive",
-                });
-            }
-        };
+const ItemPage = () => {
+  const [getItemById, { isLoading }] = useGetItemByIdMutation();
+  const [item, setItem] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imageLoading, setImageLoading] = useState(true);
+  const { itemId } = useParams();
 
-        fetchItem();
-    }, [itemId, getItemById]);
-
-    if (isLoading) {
-        return (
-            <div className="flex justify-center items-center">
-                <Loader2 className="animate-spin h-8 w-8 text-gray-500" />
-            </div>
-        );
-    }
-
-    if (!item) {
-        return <p>Item not found.</p>;
-    }
-
-    const handleThumbnailClick = (index) => {
-        setCurrentImageIndex(index);
-        setImageLoading(true);
+  useEffect(() => {
+    const fetchItem = async () => {
+      try {
+        const res = await getItemById(itemId).unwrap();
+        if (res.success) {
+          setItem(res.item);
+        } else {
+          toast({
+            title: "Failed to Load Item",
+            description: res.message,
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Failed to Load Item",
+          description: error?.data?.message || "An unexpected error occurred.",
+          variant: "destructive",
+        });
+      }
     };
 
+    fetchItem();
+  }, [itemId, getItemById]);
+
+  if (isLoading) {
     return (
-        <div className="m-5 flex justify-center flex-col gap-5">
-            <PhotoProvider>
-                <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl py-6">
-                    <div className="grid gap-3 items-start">
-                        <div className="grid gap-3 items-start">
-                            <div className="flex gap-4 items-start">
-                                {item.images.map((image, index) => (
-                                    <button
-                                        key={index}
-                                        className="border hover:border-gray-900 rounded-lg overflow-hidden transition-colors dark:hover:border-gray-50"
-                                        onClick={() => handleThumbnailClick(index)}
-                                    >
-                                        <img
-                                            src={image.url || 'https://g-uociy3gwwd9.vusercontent.net/placeholder.svg'}
-                                            alt={`Item Image ${index + 1}`}
-                                            width={100}
-                                            height={100}
-                                            className="aspect-square object-cover"
-                                        />
-                                        <span className="sr-only">View Image {index + 1}</span>
-                                    </button>
-                                ))}
-                            </div>
-                            <div className="grid gap-4 md:gap-10">
-                                {imageLoading && (
-                                    <div className="flex justify-center items-center">
-                                        <Loader className="animate-spin h-8 w-8 text-gray-500" />
-                                    </div>
-                                )}
-                                <div>
-                                    <PhotoView src={item.images[currentImageIndex]?.url || 'https://g-uociy3gwwd9.vusercontent.net/placeholder.svg'}>
-                                        <AspectRatio >
-                                            <img
-                                                src={item.images[currentImageIndex]?.url || 'https://g-uociy3gwwd9.vusercontent.net/placeholder.svg'}
-                                                alt="Product Image"
-                                                width={600}
-                                                height={600}
-                                                className={`aspect-square object-cover border border-gray-200 w-full rounded-lg overflow-hidden dark:border-gray-800 ${imageLoading ? 'hidden' : ''}`}
-                                                onLoad={() => setImageLoading(false)}
-                                                onError={() => setImageLoading(false)}
-                                            />
-                                        </AspectRatio>
-
-                                    </PhotoView>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="grid gap-4 md:gap-10 items-start">
-                        <Tabs defaultValue="description" className="w-full">
-                            <TabsList className="grid w-full grid-cols-3">
-                                <TabsTrigger value="description">Description</TabsTrigger>
-                                <TabsTrigger value="details">Details</TabsTrigger>
-                                <TabsTrigger value="location">Location</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="description">
-                                <h1 className="font-bold text-2xl lg:text-3xl">{item.name}</h1>
-                                <div className="text-xl ml-auto mt-5 flex">
-                                    {<div className="text-blue-700 p-1 rounded hover:text-blue-900 hover:bg-slate-200"><Link to={`/category/${item.category._id}`} key={item.category._id}>{item.category.name}</Link></div> || 'Category Not Available'}
-                                </div>
-                                <h2 className="text-xl mb-5">ITEM STATUS : <b>{item.status.toUpperCase()}</b></h2>
-                                <p className="text-gray-500 dark:text-gray-400">{item.description}</p>
-                            </TabsContent>
-                            <TabsContent value="details">
-                                <div>
-                                    <ul className="text-gray-500 dark:text-gray-400">
-                                        <li><strong>Reported by:</strong> {item.reportedBy?.firstName} {item.reportedBy?.lastName}</li>
-                                        <li><strong>Date Reported:</strong> {new Date(item.dateReported).toLocaleDateString()}</li>
-                                        <li><strong>Category:</strong> {item.category.name}</li>
-                                    </ul>
-                                </div>
-                            </TabsContent>
-                            <TabsContent value="location">
-                                <div>
-                                    <p className="text-gray-500 dark:text-gray-400">
-                                        Status: {item.status === 'lost' ? 'Lost' : 'Found'}
-                                    </p>
-                                    <p className="text-gray-500 dark:text-gray-400">
-                                        Returned to Owner: {item.returnedToOwner ? 'Yes' : 'No'}
-                                    </p>
-                                </div>
-                                <div className="w-full h-64 md:h-96">
-                                    <MapComponent latitude={item.location.latitude} longitude={item.location.longitude} />
-                                </div>
-                            </TabsContent>
-                        </Tabs>
-                    </div>
-
-                </div>
-            </PhotoProvider>
-        </div>
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      </div>
     );
-}
+  }
+
+  if (!item) {
+    return (
+      <Card className="m-8">
+        <CardContent className="p-8 text-center text-gray-500">
+          Item not found or has been removed.
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <PhotoProvider>
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-2 gap-8">
+          <ImageGallery
+            images={item.images}
+            currentIndex={currentImageIndex}
+            onImageSelect={(index) => {
+              setCurrentImageIndex(index);
+              setImageLoading(true);
+            }}
+            imageLoading={imageLoading}
+            setImageLoading={setImageLoading}
+          />
+
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">{item.name}</h1>
+              <ItemStatus status={item.status} returnedToOwner={item.returnedToOwner} />
+            </div>
+
+            <Tabs defaultValue="description" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="description">Description</TabsTrigger>
+                <TabsTrigger value="details">Details</TabsTrigger>
+                <TabsTrigger value="location">Location</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="description" className="space-y-4">
+                <Link
+                  to={`/category/${item.category._id}`}
+                  className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                >
+                  <Tag className="h-4 w-4" />
+                  {item.category.name}
+                </Link>
+                <p className="text-gray-600">{item.description}</p>
+              </TabsContent>
+
+              <TabsContent value="details" className="space-y-4">
+                <div className="grid gap-4">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-gray-500" />
+                    <span>Reported by: {item.reportedBy?.firstName} {item.reportedBy?.lastName}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-gray-500" />
+                    <span>Date Reported: {new Date(item.dateReported).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-gray-500" />
+                    <span>Category: {item.category.name}</span>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="location" className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-gray-500" />
+                  <span>Last Known Location</span>
+                </div>
+                <div className="h-[400px] rounded-lg overflow-hidden border border-gray-200">
+                  <MapComponent
+                    latitude={item.location.latitude}
+                    longitude={item.location.longitude}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
+      </div>
+    </PhotoProvider>
+  );
+};
+
+export default ItemPage;

@@ -1,29 +1,31 @@
-import React from 'react'
-import { Card, CardContent, CardDescription, CardTitle } from './ui/card'
-import { Button } from './ui/button'
-import { Calendar } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import React from 'react';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 
+const CategoryCard = ({ category }) => {
+  if (!category) return null;
 
-export default function CategoryCard({ category }) {
   return (
-    <Card className=" hover:cursor-pointer text-stone-600 hover:shadow-2xl hover:text-black hover:bg-slate-100 flex flex-col justify-center items-center max-w-xs md:max-w-sm lg:max-w-md rounded-lg overflow-hidden shadow-lg">
-      <div className="mt-2 flex justify-center items-center w-full h-20 md:h-25">
-          <img
-            src={category?.image}
-            alt={category.name}
-            className="w-12 h-12 md:h-20 object-cover"
-            style={{
-              objectFit: 'contain',
-              aspectRatio: '16/9',
-            }}
-          />
-      </div>
-      <CardContent className="p-4 md:p-4  space-y-1  flex flex-col justify-between">
-        <div>
-          <CardTitle className="text-lg md:text-xl font-bold">{category.name}</CardTitle>
+    <Card className="group relative transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+      <CardContent className="p-6 flex flex-col items-center space-y-4">
+       <div className="relative">
+          <div className="absolute inset-0 bg-slate-100 rounded-full scale-125 transition-transform duration-300 group-hover:scale-150 -z-10" />
+          <div className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center overflow-hidden">
+            <img
+              src={category?.image || '/api/placeholder/80/80'}
+              alt={category.name}
+              className="w-12 h-12 md:w-16 md:h-16 object-contain transition-transform duration-300 group-hover:scale-110"
+            />
+          </div>
         </div>
+
+        <CardTitle className="text-center text-lg font-medium text-gray-800 group-hover:text-gray-900 transition-colors duration-300">
+          {category.name}
+        </CardTitle>
+
+        <div className="w-12 h-1 bg-slate-200 rounded-full transition-all duration-300 group-hover:w-24 group-hover:bg-slate-300" />
       </CardContent>
     </Card>
   );
-}
+};
+
+export default CategoryCard;

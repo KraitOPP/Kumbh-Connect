@@ -1,21 +1,75 @@
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { 
+  Loader2, 
+  PlusCircle, 
+  LayoutDashboard, 
+  Package, 
+  Tags,
+  Users,
+  AlertCircle,
+  ArrowUpRight
+} from "lucide-react";
+import { useGetItemMutation } from "@/slices/itemSlice";
+import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { toast } from "@/components/ui/use-toast";
-import { useEffect, useState } from "react";
-import { useGetItemMutation } from "@/slices/itemSlice";
 import Items from "@/components/Items";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue, 
+} from "@/components/ui/select";
 
-export default function AdminDashboardPage() {
+const StatsCard = ({ title, value, icon: Icon, trend }) => (
+  <Card>
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium">
+        {title}
+      </CardTitle>
+      <Icon className="h-4 w-4 text-muted-foreground" />
+    </CardHeader>
+    <CardContent>
+      <div className="text-2xl font-bold">{value}</div>
+      {trend && (
+        <p className="text-xs text-muted-foreground">
+          {trend > 0 ? '+' : ''}{trend}% from last month
+        </p>
+      )}
+    </CardContent>
+  </Card>
+);
+
+const QuickAction = ({ title, description, icon: Icon, to }) => (
+  <Link to={to}>
+    <Card className="hover:bg-accent/50 transition-colors">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <Icon className="h-5 w-5 text-primary" />
+          <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+        </div>
+        <CardTitle className="text-lg">{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+    </Card>
+  </Link>
+);
+
+const AdminDashboardPage = () => {
   const [getItem, { isLoading }] = useGetItemMutation();
   const [items, setItems] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -42,33 +96,133 @@ export default function AdminDashboardPage() {
     fetchItems();
   }, [getItem]);
 
-  return (
-    <div className="m-5 flex flex-col gap-4">
-      <div className="flex mt-3 font-bold ml-4">Admin Dashboard</div>
+  const filteredItems = items.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = filterStatus === "all" || item.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
 
-      
-      <div className="mt-3 mb-3 flex items-center justify-center">
-        {isLoading ? (
-          <Loader2 className="animate-spin" />
-        ) : (
-          <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
-            <Card className="sm:col-span-2" x-chunk="dashboard-05-chunk-0">
-              <CardHeader className="pb-3">
-                <CardTitle>Add New Category</CardTitle>
-                <CardDescription className="max-w-lg text-balance leading-relaxed">
-                  Add new lost/found item category here.
-                </CardDescription>
-              </CardHeader>
-              <CardFooter>
-                <Link to={"/dashboard/category/add-new"}>
-                  <Button>Add New</Button>
+  const stats = {
+    totalItems: items.length,
+    lostItems: items.filter(item => item.status === "lost").length,
+    foundItems: items.filter(item => item.status === "found").length,
+    returnedItems: items.filter(item => item.returnedToOwner).length,
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto p-6 space-y-8">
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+          <p className="text-muted-foreground">
+            Manage and monitor your lost and found items
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <StatsCard 
+            title="Total Items" 
+            value={stats.totalItems} 
+            icon={Package}
+            trend={12}
+          />
+          <StatsCard 
+            title="Lost Items" 
+            value={stats.lostItems} 
+            icon={AlertCircle}
+            trend={-8}
+          />
+          <StatsCard 
+            title="Found Items" 
+            value={stats.foundItems} 
+            icon={Package}
+            trend={24}
+          />
+          <StatsCard 
+            title="Returned Items" 
+            value={stats.returnedItems} 
+            icon={Users}
+            trend={18}
+          />
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <QuickAction
+            title="Add Category"
+            description="Create new item categories"
+            icon={Tags}
+            to="/dashboard/category/add-new"
+          />
+          <QuickAction
+            title="Manage Users"
+            description="View and manage user accounts"
+            icon={Users}
+            to="/dashboard/users"
+          />
+          <QuickAction
+            title="System Settings"
+            description="Configure system preferences"
+            icon={LayoutDashboard}
+            to="/dashboard/settings"
+          />
+        </div>
+
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Items Management</CardTitle>
+            <CardDescription>
+              View and manage all lost and found items
+            </CardDescription>
+            <div className="flex flex-col sm:flex-row gap-4 mt-4">
+              <div className="flex-1">
+                <Input
+                  placeholder="Search items..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="max-w-sm"
+                />
+              </div>
+              <div className="flex gap-4">
+                <Select
+                  value={filterStatus}
+                  onValueChange={setFilterStatus}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Items</SelectItem>
+                    <SelectItem value="lost">Lost Items</SelectItem>
+                    <SelectItem value="found">Found Items</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Link to="/report/item">
+                  <Button className="gap-2">
+                    <PlusCircle className="h-4 w-4" />
+                    Add Item
+                  </Button>
                 </Link>
-              </CardFooter>
-            </Card>
-            <Items items={items}/>
-          </main>
-        )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            ) : (
+              <Items items={filteredItems} />
+            )}
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <p className="text-sm text-muted-foreground">
+              Showing {filteredItems.length} of {items.length} items
+            </p>
+          </CardFooter>
+        </Card>
       </div>
     </div>
   );
-}
+};
+
+export default AdminDashboardPage;

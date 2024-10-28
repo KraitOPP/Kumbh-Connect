@@ -1,42 +1,53 @@
-import React from 'react'
-import { Card, CardContent, CardDescription, CardTitle } from './ui/card'
-import { Button } from './ui/button'
-import { Calendar } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import React from 'react';
+import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Calendar, ArrowRight } from 'lucide-react';
 
-export default function ItemCard({ item }) {
+const ItemCard = ({ item }) => {
+  if (!item) return null;
+
   return (
-    <Card className="min-h-[300px] md:min-h-[400] lg:min-h-[500px] w-full max-w-xs md:max-w-sm lg:max-w-md rounded-lg overflow-hidden shadow-lg">
-      <div className="w-full h-48 md:h-56 lg:h-64">
-        <Link to={`/item/${item._id}`}>
+    <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-xl flex flex-col h-full">
+      <div className="relative">
+        <div className="aspect-video overflow-hidden">
           <img
-            src={item?.images[0]?.url}
-            alt="Card Image"
-            className="w-full h-full object-cover"
-            style={{
-              objectFit: 'cover',
-              aspectRatio: '16/9',
-            }}
+            src={item?.images?.[0]?.url || '/api/placeholder/400/300'}
+            alt={item.name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
-        </Link>
+        </div>
+        
+        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full shadow-sm">
+          <div className="flex items-center space-x-1 text-sm text-gray-600">
+            <Calendar className="w-4 h-4" />
+            <span>{new Date(item.dateReported).toLocaleDateString()}</span>
+          </div>
+        </div>
       </div>
-      <CardContent className="min-h-[200px] md:min-h-[250px] flex flex-col justify-between p-4 md:p-6 space-y-4">
-        <div>
-          <CardTitle className="text-lg md:text-xl font-bold">{item.name}</CardTitle>
-          <CardDescription className="text-gray-500">
-            {item.description.length > 100 ? `${item.description.slice(0, 80)}...` : item.description}
+
+      <CardContent className="p-6 flex flex-col flex-1">
+        <div className="space-y-2 flex-1">
+          <CardTitle className="text-xl font-semibold tracking-tight">
+            {item.name}
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-500 line-clamp-2">
+            {item.description}
           </CardDescription>
         </div>
-        <div className="flex justify-between items-center">
-          <Link to={`/item/${item._id}`}>
-            <Button>Learn More</Button>
-          </Link>
-          <div className="text-gray-500 text-sm flex items-center">
-            <Calendar className="mr-1" />
-            {new Date(item.dateReported).toDateString()}
-          </div>
+
+        <div className="pt-6">
+          <Button 
+            className="w-full group/button" 
+            variant="outline"
+            onClick={() => window.location.href = `/item/${item._id}`}
+          >
+            <span className="mr-2">View Details</span>
+            <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover/button:translate-x-1" />
+          </Button>
         </div>
       </CardContent>
     </Card>
   );
-}
+};
+
+export default ItemCard;

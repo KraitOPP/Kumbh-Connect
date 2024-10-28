@@ -1,4 +1,5 @@
-import { Button } from "@/components/ui/button"
+import React from 'react';
+import { Button } from "@/components/ui/button";
 import {
     Form,
     FormControl,
@@ -6,19 +7,18 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { Link, useNavigate } from "react-router-dom"
-import { Loader2 } from "lucide-react"
-import { useRegisterMutation } from "@/slices/authApiSlice"
-import { toast } from "@/components/ui/use-toast"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Link, useNavigate } from "react-router-dom";
+import { Loader2, User, Mail, Phone, Lock, UserPlus } from "lucide-react";
+import { useRegisterMutation } from "@/slices/authApiSlice";
+import { toast } from "@/components/ui/use-toast";
+import { z } from "zod";
 
 const registerFormSchema = z.object({
-    firstName: z.string().min(1, "Fist Name is required"),
+    firstName: z.string().min(1, "First Name is required"),
     lastName: z.string().optional(),
     email: z
         .string()
@@ -29,11 +29,18 @@ const registerFormSchema = z.object({
     password: z
         .string()
         .min(8, { message: "Password must be atleast 8 length" })
-})
+});
 
+const IllustrationSVG = () => (
+  <svg className="w-64 h-64" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="200" cy="200" r="150" stroke="black" strokeWidth="2" fill="white"/>
+    <path d="M200 120 C160 120 130 150 130 190 C130 230 160 260 200 260 C240 260 270 230 270 190 C270 150 240 120 200 120" stroke="black" strokeWidth="2" fill="white"/>
+    <circle cx="200" cy="160" r="30" stroke="black" strokeWidth="2" fill="white"/>
+    <path d="M150 320 C150 280 250 280 250 320" stroke="black" strokeWidth="2" fill="transparent"/>
+  </svg>
+);
 
 export const RegisterPage = () => {
-
     const navigate = useNavigate();
     const [register, {isLoading}] = useRegisterMutation();
 
@@ -46,7 +53,7 @@ export const RegisterPage = () => {
             email: "",
             password: "",
         },
-    })
+    });
 
     async function onSubmit(data) {
         try {
@@ -55,7 +62,6 @@ export const RegisterPage = () => {
                 toast({
                     title: "Registration Successful",
                 });
-    
                 navigate('/accounts/sign-in',{replace:true});
             } else {
                 toast({
@@ -72,100 +78,150 @@ export const RegisterPage = () => {
             });
         }
     }
-    
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-gray-100">
-            <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
-                <div className='text-center'>
-                    <h1 className='text-4xl font-extrabold tracking-tight lg:text-3xl mb-6'>Welcome Back to Lost & Found</h1>
-                    <p className='mb-4'>Sign Up to start your adventure</p>
+        <div className="flex min-h-screen bg-white">
+           <div className="hidden lg:flex lg:w-1/2 bg-black p-12 items-center justify-center relative overflow-hidden">
+                <div className="relative z-10 text-white space-y-6">
+                    <h1 className="text-4xl font-bold">Welcome To</h1>
+                    <p className="text-lg text-gray-300">Mahakumbh Lost and Found</p>
                 </div>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                        <FormField
-                            control={form.control}
-                            name="firstName"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>First Name</FormLabel>
-                                    <FormControl>
-                                        <Input type="text" placeholder="First Name" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="lastName"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Last Name</FormLabel>
-                                    <FormControl>
-                                        <Input type="text" placeholder="Last Name" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="phoneNumber"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Mobile Number</FormLabel>
-                                    <FormControl>
-                                        <Input type="tel" placeholder="Mobile Number" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email</FormLabel>
-                                    <FormControl>
-                                        <Input type="email" placeholder="Email" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Password</FormLabel>
-                                    <FormControl>
-                                        <Input type="password" placeholder="Password" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <div className="flex justify-center">
-                            <Button className="w-full" type="submit" disabled={isLoading}>
-                                {
-                                    isLoading ?
-                                        <>
-                                            <Loader2 className="animate-spin mr-2" />Please Wait
-                                        </> : <>Sign Up</>
-                                }
-                            </Button>
+                
+                <div className="absolute inset-0 opacity-10">
+                    <svg viewBox="0 0 400 400" className="w-full h-full">
+                        <circle cx="100" cy="100" r="80" fill="white" />
+                        <circle cx="300" cy="300" r="120" fill="white" />
+                        <path d="M100,200 Q200,100 300,200" stroke="white" fill="none" strokeWidth="40" />
+                    </svg>
+                </div>
+            </div>
+            
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+                <div className="w-full max-w-md space-y-8">
+                    <div className="text-center">
+                        <div className="flex justify-center mb-6">
+                            <UserPlus className="h-8 w-8 text-black" />
                         </div>
-                    </form>
-                </Form>
-                <div className='text-center mt-4'>
-                    <p>Already Registered? {' '}
-                        <Link to={'/accounts/sign-in'} className='text-blue-600 hover:text-blue-800'>Sign In</Link>
-                    </p>
+                        <p className="text-gray-600 mb-8">Create your account to join the community</p>
+                    </div>
+
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="firstName"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-gray-700">First Name</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                                                    <Input className="pl-10 border-gray-200 focus:border-black" type="text" placeholder="Lorem" {...field} />
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="lastName"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-gray-700">Last Name</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                                                    <Input className="pl-10 border-gray-200 focus:border-black" type="text" placeholder="Ipsum" {...field} />
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            <FormField
+                                control={form.control}
+                                name="phoneNumber"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-gray-700">Mobile Number</FormLabel>
+                                        <FormControl>
+                                            <div className="relative">
+                                                <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                                                <Input className="pl-10 border-gray-200 focus:border-black" type="tel" placeholder="9876543210" {...field} />
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-gray-700">Email</FormLabel>
+                                        <FormControl>
+                                            <div className="relative">
+                                                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                                                <Input className="pl-10 border-gray-200 focus:border-black" type="email" placeholder="lorem@example.com" {...field} />
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="password"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-gray-700">Password</FormLabel>
+                                        <FormControl>
+                                            <div className="relative">
+                                                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                                                <Input className="pl-10 border-gray-200 focus:border-black" type="password" placeholder="••••••••" {...field} />
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <Button 
+                                className="w-full bg-black hover:bg-gray-800 text-white" 
+                                type="submit" 
+                                disabled={isLoading}
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="animate-spin mr-2" />
+                                        Please Wait
+                                    </>
+                                ) : (
+                                    "Create Account"
+                                )}
+                            </Button>
+                        </form>
+                    </Form>
+
+                    <div className="text-center mt-6">
+                        <p className="text-gray-600">
+                            Already have an account?{' '}
+                            <Link to="/accounts/sign-in" className="text-black hover:underline">
+                                Sign In
+                            </Link>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
+
+export default RegisterPage;

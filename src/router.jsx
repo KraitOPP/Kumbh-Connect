@@ -6,7 +6,7 @@ import AuthLayout from './layout/authLayout'
 import HomePage from './Pages/Home'
 import { LoginPage } from './Pages/Login';
 import { RegisterPage } from './Pages/Register';
-import { ForgetPasswordPage } from './Pages/ForgetPassword';
+import ForgetPasswordPage  from './Pages/ForgetPassword';
 import Error404Page from './Pages/Error404';
 import { ProfilePage } from './Pages/UserPages/Profile';
 import AdminDashboardPage from './Pages/AdminPages/AdminDashboard';

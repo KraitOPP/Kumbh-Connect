@@ -1,5 +1,4 @@
 import {
-  // createSearchParamsCache,
   createSerializer,
   parseAsInteger,
   parseAsString
@@ -11,5 +10,4 @@ export const searchParams = {
   q: parseAsString,
 };
 
-// export const searchParamsCache = createSearchParamsCache(searchParams);
 export const serialize = createSerializer(searchParams);

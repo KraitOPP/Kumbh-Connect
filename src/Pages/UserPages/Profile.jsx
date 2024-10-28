@@ -8,11 +8,13 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import { Loader, Loader2 } from "lucide-react";
+import { Loader2, User, MapPin, Package } from "lucide-react";
 import { useGetProfileMutation, useUpdateProfileMutation } from "@/slices/userApiSlice";
 import { toast } from "@/components/ui/use-toast";
 import { useDispatch } from "react-redux";
@@ -76,10 +78,8 @@ export const ProfilePage = () => {
                 });
             }
         }
-
         fetchProfile();
     }, [getProfile, form]);
-
 
     useEffect(() => {
         const fetchItems = async () => {
@@ -102,7 +102,6 @@ export const ProfilePage = () => {
                 });
             }
         };
-
         fetchItems();
     }, [getUserItems]);
 
@@ -110,9 +109,7 @@ export const ProfilePage = () => {
         try {
             const res = await updateProfile(data).unwrap();
             if (res.success) {
-                toast({
-                    title: "Profile Updated Successfully",
-                });
+                toast({ title: "Profile Updated Successfully" });
                 dispatch(setCredentials({ user: res.user, token: res.token }));
                 setIsEditing(false);
                 form.reset(res.user);
@@ -132,93 +129,121 @@ export const ProfilePage = () => {
         }
     }
 
+    if (isFetching) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <Loader2 className="animate-spin text-gray-600" size={40} />
+            </div>
+        );
+    }
+
     return (
-        <div className="flex flex-col bg-gray-100 px-4 py-8 lg:px-24">
-            <div>
-                {isFetching ? (
-                    <div className="flex justify-center">
-                        <Loader className="animate-spin text-gray-600" size={40} />
-                    </div>
-                ) : (
-                    <div className="w-full max-w-5xl p-8 space-y-6 bg-white rounded-lg shadow-md mx-auto">
-                        <div className="text-center">
-                            <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight mb-6">Your Profile</h1>
-                        </div>
+        <div className="min-h-screen bg-gray-50 p-4 lg:p-8">
+            <div className="mx-auto max-w-6xl space-y-8">
+                <div className="flex items-center justify-between">
+                    <h1 className="text-4xl font-bold tracking-tight text-gray-900">Profile Settings</h1>
+                    <Button 
+                        onClick={() => setIsEditing(!isEditing)}
+                        variant={isEditing ? "destructive" : "outline"}
+                    >
+                        {isEditing ? "Cancel Editing" : "Edit Profile"}
+                    </Button>
+                </div>
 
-                        <div className="flex justify-end mb-4">
-                            <Button onClick={() => setIsEditing(!isEditing)} variant="outline">
-                                {isEditing ? "Cancel" : "Edit Profile"}
-                            </Button>
-                        </div>
+                <Tabs defaultValue="personal" className="space-y-6">
+                    <TabsList>
+                        <TabsTrigger value="personal" className="space-x-2">
+                            <User size={16} />
+                            <span>Personal Info</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="items" className="space-x-2">
+                            <Package size={16} />
+                            <span>Your Items</span>
+                        </TabsTrigger>
+                    </TabsList>
 
+                    <TabsContent value="personal">
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <FormField
-                                        control={form.control}
-                                        name="firstName"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>First Name</FormLabel>
-                                                <FormControl>
-                                                    <Input type="text" placeholder="First Name" {...field} disabled={!isEditing} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="lastName"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Last Name</FormLabel>
-                                                <FormControl>
-                                                    <Input type="text" placeholder="Last Name" {...field} disabled={!isEditing} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="phoneNumber"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Mobile Number</FormLabel>
-                                                <FormControl>
-                                                    <Input type="tel" placeholder="Mobile Number" {...field} disabled={!isEditing} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Email</FormLabel>
-                                                <FormControl>
-                                                    <Input type="email" placeholder="Email" {...field} disabled={!isEditing} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center space-x-2">
+                                            <User size={20} />
+                                            <span>Personal Information</span>
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                        <FormField
+                                            control={form.control}
+                                            name="firstName"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>First Name</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} disabled={!isEditing} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="lastName"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Last Name</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} disabled={!isEditing} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Email</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} type="email" disabled={!isEditing} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="phoneNumber"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Phone Number</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} type="tel" disabled={!isEditing} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </CardContent>
+                                </Card>
 
-                                <div className="border-t pt-6">
-                                    <h2 className="text-2xl font-semibold mb-4">Address</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center space-x-2">
+                                            <MapPin size={20} />
+                                            <span>Address Details</span>
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                         <FormField
                                             control={form.control}
                                             name="address.street"
                                             render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Street</FormLabel>
+                                                <FormItem className="col-span-2">
+                                                    <FormLabel>Street Address</FormLabel>
                                                     <FormControl>
-                                                        <Input type="text" placeholder="Street" {...field} disabled={!isEditing} />
+                                                        <Input {...field} disabled={!isEditing} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -231,7 +256,7 @@ export const ProfilePage = () => {
                                                 <FormItem>
                                                     <FormLabel>City</FormLabel>
                                                     <FormControl>
-                                                        <Input type="text" placeholder="City" {...field} disabled={!isEditing} />
+                                                        <Input {...field} disabled={!isEditing} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -244,7 +269,7 @@ export const ProfilePage = () => {
                                                 <FormItem>
                                                     <FormLabel>State</FormLabel>
                                                     <FormControl>
-                                                        <Input type="text" placeholder="State" {...field} disabled={!isEditing} />
+                                                        <Input {...field} disabled={!isEditing} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -257,7 +282,7 @@ export const ProfilePage = () => {
                                                 <FormItem>
                                                     <FormLabel>Country</FormLabel>
                                                     <FormControl>
-                                                        <Input type="text" placeholder="Country" {...field} disabled={!isEditing} />
+                                                        <Input {...field} disabled={!isEditing} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -270,14 +295,14 @@ export const ProfilePage = () => {
                                                 <FormItem>
                                                     <FormLabel>Postal Code</FormLabel>
                                                     <FormControl>
-                                                        <Input type="text" placeholder="Postal Code" {...field} disabled={!isEditing} />
+                                                        <Input {...field} disabled={!isEditing} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
-                                    </div>
-                                </div>
+                                    </CardContent>
+                                </Card>
 
                                 {isEditing && (
                                     <Button
@@ -286,7 +311,10 @@ export const ProfilePage = () => {
                                         disabled={isUpdating}
                                     >
                                         {isUpdating ? (
-                                            <Loader2 className="animate-spin mr-2" size={20} />
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                <span>Saving Changes...</span>
+                                            </>
                                         ) : (
                                             "Save Changes"
                                         )}
@@ -294,17 +322,18 @@ export const ProfilePage = () => {
                                 )}
                             </form>
                         </Form>
-                    </div>
-                )}
-            </div>
-            <div className="mt-10">
-                {isFetchingItems ? (
-                    <div className="flex justify-center">
-                        <Loader className="animate-spin text-gray-600" size={40} />
-                    </div>
-                ) : (
-                    <Items items={items} />
-                )}
+                    </TabsContent>
+
+                    <TabsContent value="items">
+                        {isFetchingItems ? (
+                            <div className="flex justify-center p-8">
+                                <Loader2 className="animate-spin text-gray-600" size={40} />
+                            </div>
+                        ) : (
+                            <Items items={items} />
+                        )}
+                    </TabsContent>
+                </Tabs>
             </div>
         </div>
     );
