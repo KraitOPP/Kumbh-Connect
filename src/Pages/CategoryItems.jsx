@@ -67,13 +67,13 @@ export default function CategoryItems() {
       {category ? (
         <>
           <h2 className="text-2xl w-full text-start">
-            All Listings in <b>{category.name}</b>
+            All Listings in <b>{category?.name}</b>
           </h2>
           <p className="text-gray-500">
-            {items.length} items found in the <b>{category.name}</b> category.
+            {items?.length} items found in the <b>{category?.name}</b> category.
           </p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {items.length > 0 ? (
+            {items && items.length > 0 ? (
               <>
                 {items.map((item) => (
                   <ItemCard key={item._id} item={item} />

@@ -29,18 +29,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { differenceInDays } from "date-fns";
 
-const saveScrollPosition = () => {
-    window.localStorage.setItem("scrollPosition", window.scrollY);
-};
-
-// Restore the saved scroll position after re-render
-const restoreScrollPosition = () => {
-    const savedPosition = window.localStorage.getItem("scrollPosition");
-    if (savedPosition) {
-        window.scrollTo(0, parseInt(savedPosition, 10));
-    }
-};
-
 
 export default function Items({ items }) {
 
@@ -49,9 +37,8 @@ export default function Items({ items }) {
         lost: true,
         returned: true,
     });
-    const [timeFilter, setTimeFilter] = useState("week");
+    const [timeFilter, setTimeFilter] = useState("month");
     const handleFilterChange = (filter) => {
-        saveScrollPosition(); 
         setFilters((prevFilter) => ({
             ...prevFilter,
             [filter]: !prevFilter[filter],
@@ -59,13 +46,8 @@ export default function Items({ items }) {
     };
 
     const handleTimeFilterChange = (value) => {
-        saveScrollPosition(); 
         setTimeFilter(value);
     };
-
-    useEffect(() => {
-        restoreScrollPosition();
-    }, [filters]);
 
 
 
@@ -90,9 +72,9 @@ export default function Items({ items }) {
     const filteredItems = filterItems(items, timeFilter, filters);
 
     return (
-        <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-3">
+        <div className="min-h-[60vh] grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-3">
             <Tabs
-                defaultValue="week"
+                defaultValue="month"
                 onValueChange={(value) => handleTimeFilterChange(value)}
             >
                 <div className="flex items-center">

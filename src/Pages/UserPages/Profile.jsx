@@ -133,14 +133,14 @@ export const ProfilePage = () => {
     }
 
     return (
-        <div className="flex flex-col  bg-gray-100 px-4 py-8 lg:px-24">
+        <div className="flex flex-col bg-gray-100 px-4 py-8 lg:px-24">
             <div>
                 {isFetching ? (
                     <div className="flex justify-center">
                         <Loader className="animate-spin text-gray-600" size={40} />
                     </div>
                 ) : (
-                    <div className="w-full max-w-7xl p-8 space-y-6 bg-white rounded-lg shadow-md mx-auto">
+                    <div className="w-full max-w-5xl p-8 space-y-6 bg-white rounded-lg shadow-md mx-auto">
                         <div className="text-center">
                             <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight mb-6">Your Profile</h1>
                         </div>
@@ -208,88 +208,96 @@ export const ProfilePage = () => {
                                     />
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <FormField
-                                        control={form.control}
-                                        name="address.street"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Street</FormLabel>
-                                                <FormControl>
-                                                    <Input type="text" placeholder="Street" {...field} disabled={!isEditing} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="address.city"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>City</FormLabel>
-                                                <FormControl>
-                                                    <Input type="text" placeholder="City" {...field} disabled={!isEditing} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="address.state"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>State</FormLabel>
-                                                <FormControl>
-                                                    <Input type="text" placeholder="State" {...field} disabled={!isEditing} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="address.country"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Country</FormLabel>
-                                                <FormControl>
-                                                    <Input type="text" placeholder="Country" {...field} disabled={!isEditing} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="address.postalCode"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Postal Code</FormLabel>
-                                                <FormControl>
-                                                    <Input type="text" placeholder="Postal Code" {...field} disabled={!isEditing} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                <div className="border-t pt-6">
+                                    <h2 className="text-2xl font-semibold mb-4">Address</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <FormField
+                                            control={form.control}
+                                            name="address.street"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Street</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="text" placeholder="Street" {...field} disabled={!isEditing} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="address.city"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>City</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="text" placeholder="City" {...field} disabled={!isEditing} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="address.state"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>State</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="text" placeholder="State" {...field} disabled={!isEditing} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="address.country"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Country</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="text" placeholder="Country" {...field} disabled={!isEditing} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="address.postalCode"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Postal Code</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="text" placeholder="Postal Code" {...field} disabled={!isEditing} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
                                 </div>
 
                                 {isEditing && (
-                                    <div className="flex justify-end">
-                                        <Button type="submit" variant="default">
-                                            {isUpdating ? <Loader size={20} className="animate-spin" /> : "Save"}
-                                        </Button>
-                                    </div>
+                                    <Button
+                                        type="submit"
+                                        className="w-full"
+                                        disabled={isUpdating}
+                                    >
+                                        {isUpdating ? (
+                                            <Loader2 className="animate-spin mr-2" size={20} />
+                                        ) : (
+                                            "Save Changes"
+                                        )}
+                                    </Button>
                                 )}
                             </form>
                         </Form>
                     </div>
                 )}
             </div>
-
-            <div className="w-full mt-8">
+            <div className="mt-10">
                 {isFetchingItems ? (
                     <div className="flex justify-center">
                         <Loader className="animate-spin text-gray-600" size={40} />
@@ -301,5 +309,3 @@ export const ProfilePage = () => {
         </div>
     );
 };
-
-export default ProfilePage;

@@ -8,13 +8,13 @@ import { LoginPage } from './Pages/Login';
 import { RegisterPage } from './Pages/Register';
 import { ForgetPasswordPage } from './Pages/ForgetPassword';
 import Error404Page from './Pages/Error404';
-import { ProfilePage } from './Pages/Profile';
-import AdminLayout from './layout/adminLayout';
-import AdminDashboardPage from './Pages/AdminDashboard';
+import { ProfilePage } from './Pages/UserPages/Profile';
+import AdminDashboardPage from './Pages/AdminPages/AdminDashboard';
 import { AddItemCategoryPage } from './Pages/AdminPages/ItemCategory';
 import ReportItemPage  from './Pages/UserPages/reportItem';
 import CategoryItems from './Pages/CategoryItems';
 import ItemPage from './Pages/Item';
+import UserListingPage from './Pages/AdminPages/UsersPage/users-listing-page';
 
 
 export const router = createBrowserRouter([
@@ -42,11 +42,15 @@ export const router = createBrowserRouter([
     },
     {
       path:"/dashboard/",
-      element: <AdminLayout />,
+      element: <MainLayout />,
       children:[
         {
           path: "",
           element:<AdminDashboardPage />
+        },
+        {
+          path: "users",
+          element:<UserListingPage />
         },
         {
           path: "category/add-new",

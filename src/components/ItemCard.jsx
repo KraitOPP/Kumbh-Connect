@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
 
 export default function ItemCard({ item }) {
   return (
-    <Card className="w-full max-w-xs md:max-w-sm lg:max-w-md rounded-lg overflow-hidden shadow-lg">
+    <Card className="min-h-[300px] md:min-h-[400] lg:min-h-[500px] w-full max-w-xs md:max-w-sm lg:max-w-md rounded-lg overflow-hidden shadow-lg">
       <div className="w-full h-48 md:h-56 lg:h-64">
         <Link to={`/item/${item._id}`}>
           <img
@@ -20,11 +20,11 @@ export default function ItemCard({ item }) {
           />
         </Link>
       </div>
-      <CardContent className="p-4 md:p-6 space-y-4 min-h-48 flex flex-col justify-between">
+      <CardContent className="min-h-[200px] md:min-h-[250px] flex flex-col justify-between p-4 md:p-6 space-y-4">
         <div>
           <CardTitle className="text-lg md:text-xl font-bold">{item.name}</CardTitle>
           <CardDescription className="text-gray-500">
-            {item.description.length > 100 ? `${item.description.slice(0, 100)}...` : item.description}
+            {item.description.length > 100 ? `${item.description.slice(0, 80)}...` : item.description}
           </CardDescription>
         </div>
         <div className="flex justify-between items-center">

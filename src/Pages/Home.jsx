@@ -95,7 +95,7 @@ export default function HomePage() {
         {isFetching ? (
           <Loader2 className="animate-spin" />
         ) : (
-          <div className="items-center grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="items-center grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {items.length > 0 ? <>
               {items.map((item) => (
                 <ItemCard key={item._id} item={item} />

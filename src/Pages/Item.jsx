@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useGetItemByIdMutation } from "@/slices/itemSlice";
 import { Loader, Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import 'react-photo-view/dist/react-photo-view.css';
 import { PhotoProvider, PhotoView } from 'react-photo-view';
@@ -114,14 +114,14 @@ export default function ItemPage() {
                             <TabsList className="grid w-full grid-cols-3">
                                 <TabsTrigger value="description">Description</TabsTrigger>
                                 <TabsTrigger value="details">Details</TabsTrigger>
-                                <TabsTrigger value="status">Status</TabsTrigger>
+                                <TabsTrigger value="location">Location</TabsTrigger>
                             </TabsList>
                             <TabsContent value="description">
                                 <h1 className="font-bold text-2xl lg:text-3xl">{item.name}</h1>
-                                <div className="text-xl ml-auto mt-5">
-                                    {item.category.name || 'Category Not Available'}
+                                <div className="text-xl ml-auto mt-5 flex">
+                                    {<div className="text-blue-700 p-1 rounded hover:text-blue-900 hover:bg-slate-200"><Link to={`/category/${item.category._id}`} key={item.category._id}>{item.category.name}</Link></div> || 'Category Not Available'}
                                 </div>
-                                <h2 className="text-xl mb-5">Item Status : <b>{item.status.toUpperCase()}</b></h2>
+                                <h2 className="text-xl mb-5">ITEM STATUS : <b>{item.status.toUpperCase()}</b></h2>
                                 <p className="text-gray-500 dark:text-gray-400">{item.description}</p>
                             </TabsContent>
                             <TabsContent value="details">
@@ -133,7 +133,7 @@ export default function ItemPage() {
                                     </ul>
                                 </div>
                             </TabsContent>
-                            <TabsContent value="status">
+                            <TabsContent value="location">
                                 <div>
                                     <p className="text-gray-500 dark:text-gray-400">
                                         Status: {item.status === 'lost' ? 'Lost' : 'Found'}
