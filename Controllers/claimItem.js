@@ -10,6 +10,7 @@ const claimSchemaValidate = z.object({
     claimBy: z
         .string({ required_error: "Person Claimed not Found" })
         .regex(/^[0-9a-fA-F]{24}$/, { message: "Invalid User ObjectId" }),
+    status: z.enum(['pending', 'accepted', 'rejected']).optional(),
     claimVerified: z.boolean().optional(),
     dateReported: z.date().optional(),
 });
@@ -35,7 +36,7 @@ const handleClaimItem = async (req, res) => {
                 claimBy,
                 dateReported: new Date(),
             });
-            
+
 
             await claim.save();
 
@@ -74,7 +75,7 @@ const handleClaimVerification = async (req, res) => {
         const claim = await ClaimItem.findById(claimId);
         if (!claim) {
             return res.status(401).json({
-                success: false, 
+                success: false,
                 message: "Invalid Claim Request",
             });
         }
@@ -86,7 +87,7 @@ const handleClaimVerification = async (req, res) => {
 
         if (status.toLowerCase() === "accepted") {
             await ClaimItem.updateMany(
-                { item: claim.item, _id: { $ne: claimId } }, 
+                { item: claim.item, _id: { $ne: claimId } },
                 { $set: { status: "rejected" } }
             );
 
@@ -98,7 +99,7 @@ const handleClaimVerification = async (req, res) => {
         await claim.save();
         await itemClaimed.save();
 
-        return res.status(201).json({
+        return res.status(200).json({
             success: true,
             message: "Claim Processed Successfully",
         });

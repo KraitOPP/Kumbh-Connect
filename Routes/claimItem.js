@@ -11,6 +11,6 @@ const {
 router.get('/',isAuthenticated, isAdmin, handleGetClaims);
 router.get('/u/', isAuthenticated, handleUserClaims);
 router.post('/', isAuthenticated, handleClaimItem);
-router.get('/verify',isAuthenticated, isAdmin, handleClaimVerification);
+router.put('/verify',isAuthenticated, isAdmin, handleClaimVerification);
 
 module.exports = router;

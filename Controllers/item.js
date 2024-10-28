@@ -186,7 +186,7 @@ const handleUpdateItemStatus = async (req, res) => {
         const validate = itemUpdateSchemaValidate.safeParse({status, returnedTo, returnedToOwner});
 
         if (validate.success) {
-            const returnedOn = new Date.now();
+            const returnedOn = new Date();
             const updateFields = {
                 status,
                 returnedTo,

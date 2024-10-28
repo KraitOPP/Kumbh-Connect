@@ -154,6 +154,56 @@ const handleGetProfile = async (req,res)=>{
     }
 }
 
+const handleGetUsers = async (req, res) => {
+    try {
+        const { search, page = 1, limit = 10 } = req.query;
+
+        let query = {};
+
+        if (search) {
+            const searchRegex = new RegExp(search, 'i'); 
+            query.$or = [
+                { firstName: searchRegex },
+                { lastName: searchRegex },
+                { email: searchRegex },
+                { role: searchRegex },
+                { phoneNumber: searchRegex },
+                { 'address.street': searchRegex },
+                { 'address.city': searchRegex },
+                { 'address.state': searchRegex },
+                { 'address.country': searchRegex },
+                { 'address.postalCode': searchRegex },
+            ];
+        }
+
+        const pageNumber = parseInt(page);
+        const pageSize = parseInt(limit);
+        const skip = (pageNumber - 1) * pageSize;
+
+        const users = await User.find(query)
+            .select('-password -__v')
+            .skip(skip)
+            .limit(pageSize);
+
+        const totalUsers = await User.countDocuments(query);
+
+        return res.status(200).json({
+            users,
+            totalUsers,
+            currentPage: pageNumber,
+            totalPages: Math.ceil(totalUsers / pageSize),
+        });
+    } catch (error) {
+        console.error("Error Fetching Users Details",error);
+        return res.status(500).json({
+            success:false,
+            message: "Internal Server Issue, Please try again!",
+        });
+    }
+};
 
 
-module.exports = {handleGetProfile, handleUpdateUser};
+
+
+
+module.exports = {handleGetProfile, handleUpdateUser, handleGetUsers};
