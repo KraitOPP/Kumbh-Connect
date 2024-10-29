@@ -10,7 +10,7 @@ import {
   AlertCircle,
   ArrowUpRight
 } from "lucide-react";
-import { useGetItemMutation } from "@/slices/itemSlice";
+import {  useGetItemsQuery } from "@/slices/itemSlice";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,35 +66,21 @@ const QuickAction = ({ title, description, icon: Icon, to }) => (
 );
 
 const AdminDashboardPage = () => {
-  const [getItem, { isLoading }] = useGetItemMutation();
-  const [items, setItems] = useState([]);
+  const { data, isLoading, error, refetch } = useGetItemsQuery();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
   useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const res = await getItem().unwrap();
-        if (res.success) {
-          setItems(res.items);
-        } else {
-          toast({
-            title: "Failed to Load Items",
-            description: res.message,
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        toast({
-          title: "Failed to Load Items",
-          description: error?.data?.message || "An unexpected error occurred.",
-          variant: "destructive",
-        });
-      }
-    };
+    if (error) {
+      toast({
+        title: "Failed to Load Items",
+        description: error?.data?.message || "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
-    fetchItems();
-  }, [getItem]);
+  const items = data?.items || [];
 
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -211,7 +197,7 @@ const AdminDashboardPage = () => {
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
             ) : (
-              <Items items={filteredItems} />
+              <Items items={filteredItems} refetch={refetch} />
             )}
           </CardContent>
           <CardFooter className="flex justify-between">

@@ -22,7 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "@/components/ui/use-toast";
 import { logout, selectUser } from "@/slices/authSlice";
-import { useGetItemMutation } from "@/slices/itemSlice";
+import { useGetItemsQuery } from "@/slices/itemSlice";
 import Navigation from "./navigation";
 import icon from '@/assets/icon.png';
 
@@ -30,13 +30,23 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userInfo = useSelector(selectUser);
-  const [items, setItems] = useState([]);
-  const [getItems] = useGetItemMutation();
+  const { data, isLoading, error, refetch } = useGetItemsQuery();
+  const items = data?.items || [];
   const [searchQuery, setSearchQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [openMenus, setOpenMenus] = useState({});
+
+  useEffect(() => {
+    if (error) {
+        toast({
+            title: "Failed to Load Items",
+            description: error?.data?.message || "An unexpected error occurred.",
+            variant: "destructive",
+        });
+    }
+}, [error, toast]);
 
   const toggleMenu = (index) => {
     setOpenMenus((prev) => ({
@@ -52,29 +62,6 @@ const Navbar = () => {
       title: "Logout Successfully.",
     });
   };
-
-  useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const res = await getItems().unwrap();
-        if (res.success) {
-          setItems(res.items);
-        } else {
-          toast({
-            title: "Failed to Search Items",
-            description: res.message,
-          });
-        }
-      } catch (error) {
-        toast({
-          title: "Failed to Search Items",
-          description: error?.message || "An error occurred",
-        });
-      }
-    };
-
-    fetchItems();
-  }, [getItems]);
 
   const handleItemClick = (id) => {
     navigate(`/item/${id}`);

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Loader, Loader2, MapPin, User, Calendar, Tag, Check, X } from "lucide-react";
 import { PhotoProvider, PhotoView } from 'react-photo-view';
-import { useGetItemByIdMutation } from "@/slices/itemSlice";
+import {  useGetItemByIdQuery } from "@/slices/itemSlice";
 import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -74,36 +74,21 @@ const ItemStatus = ({ status, returnedToOwner }) => (
 );
 
 const ItemPage = () => {
-  const [getItemById, { isLoading }] = useGetItemByIdMutation();
-  const [item, setItem] = useState(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [imageLoading, setImageLoading] = useState(true);
-  const { itemId } = useParams();
+    const { itemId } = useParams();
+    const { data, isLoading, error, refetchItem } = useGetItemByIdQuery(itemId);
+    const item = data?.item || [];
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [imageLoading, setImageLoading] = useState(true);
 
   useEffect(() => {
-    const fetchItem = async () => {
-      try {
-        const res = await getItemById(itemId).unwrap();
-        if (res.success) {
-          setItem(res.item);
-        } else {
-          toast({
-            title: "Failed to Load Item",
-            description: res.message,
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        toast({
-          title: "Failed to Load Item",
-          description: error?.data?.message || "An unexpected error occurred.",
-          variant: "destructive",
-        });
-      }
-    };
-
-    fetchItem();
-  }, [itemId, getItemById]);
+    if (error) {
+      toast({
+        title: "Failed to Load Item",
+        description: error?.data?.message || "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
   if (isLoading) {
     return (

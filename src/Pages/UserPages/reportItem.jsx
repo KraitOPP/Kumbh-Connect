@@ -24,7 +24,7 @@ import { Loader2, MapPin, Image as ImageIcon, Plus, Minus, Navigation } from "lu
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 import { useReportItemMutation } from "@/slices/itemSlice";
-import { useGetItemCategoryMutation } from "@/slices/categorySlice";
+import { useGetItemCategoryQuery } from "@/slices/categorySlice";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -57,8 +57,8 @@ const LocationMarker = ({ location, setLocation }) => {
 export default function ReportItemPage() {
     const navigate = useNavigate();
     const [reportItem, { isReporting }] = useReportItemMutation();
-    const [getItemCategory, { isLoading: isFetchingCategory }] = useGetItemCategoryMutation();
-    const [categories, setCategories] = useState([]);
+    const { data, isLoading: isFetchingCategory, error, refetchCategories } = useGetItemCategoryQuery();
+    const categories = data?.categories;
     const [images, setImages] = useState([""]);
     const [location, setLocation] = useState({
         latitude: 25.427980726672878,
@@ -81,20 +81,14 @@ export default function ReportItemPage() {
     });
 
     useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const res = await getItemCategory().unwrap();
-                setCategories(res.categories);
-            } catch (error) {
-                toast({
-                    title: "Error",
-                    description: "Failed to get Categories. Please Try Again Later",
-                    variant: "destructive",
-                });
-            }
-        };
-        fetchCategories();
-    }, []);
+        if (error) {
+          toast({
+            title: "Failed to Load Categories",
+            description: error?.data?.message || "An unexpected error occurred.",
+            variant: "destructive",
+          });
+        }
+      }, [error, toast]);
 
     // const getCurrentLocation = () => {
     //     navigator.geolocation.getCurrentPosition(

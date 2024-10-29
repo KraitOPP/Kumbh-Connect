@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {  AlertCircle, Plus, Archive } from "lucide-react";
 import { motion } from "framer-motion";
-import { useGetItemMutation } from "@/slices/itemSlice";
-import { useGetItemCategoryMutation } from "@/slices/categorySlice";
+import { useGetItemsQuery } from "@/slices/itemSlice";
+import { useGetItemCategoryQuery } from "@/slices/categorySlice";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -56,39 +56,30 @@ const HeroSection = () => (
 );
 
 export default function HomePage() {
-  const [getItem, { isLoading: isFetching }] = useGetItemMutation();
-  const [getCategories, { isLoading: isFetchingCategory }] = useGetItemCategoryMutation();
-  const [items, setItems] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const { data, isLoading: isFetching, errorInFetchingItems, refetchItem } = useGetItemsQuery();
+  const items = data?.items || [];
+  const { data: Catdata, isLoading: isFetchingCategory, errorInFetchingCategories, refetchCategories } = useGetItemCategoryQuery();
+  const categories = Catdata?.categories || [];
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [itemsRes, categoriesRes] = await Promise.all([
-          getItem().unwrap(),
-          getCategories().unwrap(),
-        ]);
-
-        if (itemsRes.success) {
-          setItems(itemsRes.items);
-        }
-
-        if (categoriesRes.success) {
-          setCategories(categoriesRes.categories);
-        }
-      } catch (error) {
-        setError(error?.data?.message || "Failed to load content");
+    if (errorInFetchingItems) {
         toast({
-          title: "Error",
-          description: "Failed to load content. Please try again later.",
-          variant: "destructive",
+            title: "Failed to Load Content",
+            description: errorInFetchingItems?.data?.message || "An unexpected error occurred.",
+            variant: "destructive",
         });
-      }
-    };
-
-    fetchData();
-  }, [getItem, getCategories]);
+        setError(errorInFetchingItems?.data?.message || "An unexpected error occurred.");
+    }
+    if (errorInFetchingCategories) {
+        toast({
+            title: "Failed to Load Content",
+            description: errorInFetchingCategories?.data?.message || "An unexpected error occurred.",
+            variant: "destructive",
+        });
+        setError(errorInFetchingCategories?.data?.message || "An unexpected error occurred.");
+    }
+}, [errorInFetchingItems,errorInFetchingCategories, toast]);
 
   return (
     <div className="min-h-screen bg-gray-50">

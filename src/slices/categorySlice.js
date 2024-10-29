@@ -9,14 +9,11 @@ const categoryApiSlice = apiSlice.injectEndpoints({
                 body:data,
             })
         }),
-
-        getItemCategory: builder.mutation({
-            query:()=>({
-               url:'/category/',
-                method:'GET',
-            })
-        }),        
+        getItemCategory: builder.query({
+            query: () => 'category',
+            providesTags: ['Categories']
+        }),    
     }
 )})
 
-export const {useAddItemCategoryMutation, useGetItemCategoryMutation} = categoryApiSlice;
+export const {useAddItemCategoryMutation, useGetItemCategoryQuery} = categoryApiSlice;

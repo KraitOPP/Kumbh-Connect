@@ -15,11 +15,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { Loader2, User, MapPin, Package } from "lucide-react";
-import { useGetProfileMutation, useUpdateProfileMutation } from "@/slices/userApiSlice";
+import { useGetProfileQuery, useUpdateProfileMutation } from "@/slices/userApiSlice";
 import { toast } from "@/components/ui/use-toast";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/slices/authSlice";
-import { useGetUserItemMutation } from "@/slices/itemSlice";
+import {  useGetUserItemQuery } from "@/slices/itemSlice";
 import Items from "@/components/Items";
 
 const userSchemaUpdateValidate = z.object({
@@ -42,11 +42,12 @@ const userSchemaUpdateValidate = z.object({
 
 export const ProfilePage = () => {
     const dispatch = useDispatch();
-    const [getProfile, { isLoading: isFetching }] = useGetProfileMutation();
+    const { data, isLoading, error, refetch } = useGetProfileQuery();
+    const user = data?.user;
     const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
-    const [getUserItems, { isLoading: isFetchingItems }] = useGetUserItemMutation();
     const [isEditing, setIsEditing] = useState(false);
-    const [items, setItems] = useState([]);
+    const { data: ItemsData, isLoading: isFetchingItems, errorInFetchingItems, refetchItem } = useGetUserItemQuery();
+    const items = ItemsData?.items || [];
 
     const form = useForm({
         resolver: zodResolver(userSchemaUpdateValidate),
@@ -66,44 +67,27 @@ export const ProfilePage = () => {
     });
 
     useEffect(() => {
-        async function fetchProfile() {
-            try {
-                const res = await getProfile().unwrap();
-                form.reset(res.user);
-            } catch (error) {
-                toast({
-                    title: "Failed to load profile",
-                    description: error?.data?.message || "An unexpected error occurred.",
-                    variant: "destructive",
-                });
-            }
+        if (error) {
+            toast({
+                title: "Failed to Fetch Profile",
+                description: error?.data?.message || "An unexpected error occurred.",
+                variant: "destructive",
+            });
         }
-        fetchProfile();
-    }, [getProfile, form]);
+        if (errorInFetchingItems) {
+            toast({
+                title: "Failed to Fetch Items",
+                description: errorInFetchingItems?.data?.message || "An unexpected error occurred.",
+                variant: "destructive",
+            });
+        }
+    }, [error,errorInFetchingItems, toast]);
 
     useEffect(() => {
-        const fetchItems = async () => {
-            try {
-                const res = await getUserItems().unwrap();
-                if (res.success) {
-                    setItems(res.items);
-                } else {
-                    toast({
-                        title: "Failed to Load Items",
-                        description: res.message,
-                        variant: "destructive",
-                    });
-                }
-            } catch (error) {
-                toast({
-                    title: "Failed to Load Items",
-                    description: error?.data?.message || "An unexpected error occurred.",
-                    variant: "destructive",
-                });
-            }
-        };
-        fetchItems();
-    }, [getUserItems]);
+        if (user) {
+            form.reset(user);
+        }
+    }, [user, form]);
 
     async function onSubmit(data) {
         try {
@@ -129,7 +113,7 @@ export const ProfilePage = () => {
         }
     }
 
-    if (isFetching) {
+    if (isLoading || isFetchingItems) {
         return (
             <div className="flex h-screen items-center justify-center">
                 <Loader2 className="animate-spin text-gray-600" size={40} />
@@ -142,7 +126,7 @@ export const ProfilePage = () => {
             <div className="mx-auto max-w-6xl space-y-8">
                 <div className="flex items-center justify-between">
                     <h1 className="text-4xl font-bold tracking-tight text-gray-900">Profile Settings</h1>
-                    <Button 
+                    <Button
                         onClick={() => setIsEditing(!isEditing)}
                         variant={isEditing ? "destructive" : "outline"}
                     >

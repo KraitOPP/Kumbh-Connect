@@ -1,36 +1,43 @@
 import React, { useState } from 'react'
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ListFilter, MoreHorizontal } from "lucide-react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { differenceInDays } from "date-fns";
+import { useUpdateItemMutation } from '@/slices/itemSlice';
+import { useToast } from './ui/use-toast';
+import EditItemForm from './editItemForm';
+
 
 export default function Items({ items }) {
 
+    const [updateItem, { isLoading }] = useUpdateItemMutation();
+    const [selectedItem, setSelectedItem] = useState(null);
+    const { toast } = useToast();
     const [filters, setFilters] = useState({
         found: true,
         lost: true,
@@ -68,6 +75,27 @@ export default function Items({ items }) {
     };
 
     const filteredItems = filterItems(items, timeFilter, filters);
+    const handleEditItem = async (itemId, updatedData) => {
+        try {
+            const response = await updateItem({_id: itemId,item: updatedData}).unwrap();
+
+            if (response.success) {
+                toast({
+                    title: "Success",
+                    description: "Item updated successfully",
+                });
+                setSelectedItem(null);
+            }
+
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: error?.data?.message || "Failed to update item",
+                variant: "destructive",
+            });
+        }
+    };
+
 
     return (
         <div className="min-h-[60vh] grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-3">
@@ -199,7 +227,12 @@ export default function Items({ items }) {
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent align="end">
                                                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                onClick={() => setSelectedItem(item)}
+                                                                onSelect={(e) => e.preventDefault()}
+                                                            >
+                                                                Edit
+                                                            </DropdownMenuItem>
                                                             <DropdownMenuItem>Delete</DropdownMenuItem>
                                                         </DropdownMenuContent>
                                                     </DropdownMenu>
@@ -218,6 +251,15 @@ export default function Items({ items }) {
                     </Card>
                 </TabsContent>
             </Tabs>
+            {selectedItem && (
+                <EditItemForm
+                    item={selectedItem}
+                    isOpen={!!selectedItem}
+                    onClose={() => setSelectedItem(null)}
+                    onSave={handleEditItem}
+                    isLoading={isLoading}
+                />
+            )}
         </div>
     )
 }

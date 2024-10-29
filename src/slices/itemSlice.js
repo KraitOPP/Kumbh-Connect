@@ -1,40 +1,40 @@
 import { apiSlice } from "./apiSlice";
 
 const itemsApiSlice = apiSlice.injectEndpoints({
-    endpoints: (builder)=>({
-            reportItem: builder.mutation({
-                query:(data)=>({
-                    url:'/item/',
-                    method:'POST',
-                    body:data,
-                })
+    endpoints: (builder) => ({
+        reportItem: builder.mutation({
+            query: (data) => ({
+                url: '/item/',
+                method: 'POST',
+                body: data,
+            })
+        }),
+        updateItem: builder.mutation({
+            query: ({ _id, item }) => ({
+                url: `item/${_id}`,
+                method: 'PUT',
+                body: item
             }),
-            getItem: builder.mutation({
-                query:()=>({
-                    url:'/item/',
-                    method:'GET',
-                })
-            }),
-            getItemByCategory: builder.mutation({
-                query:(categoryId)=>({
-                    url:`/item/category/${categoryId}`,
-                    method:'GET',
-                })
-            }),
-            getUserItem: builder.mutation({
-                query:()=>({
-                    url:'/item/user/',
-                    method:'GET',
-                })
-            }),
-            getItemById: builder.mutation({
-                query:(id)=>({
-                    url:`/item/id/${id}`,
-                    method:'GET',
-                })
-            }),
-        }
+            invalidatesTags: ['Items']
+        }),
+        getItems: builder.query({
+            query: () => 'item',
+            providesTags: ['Items']
+        }),
+        getItemsByCategory: builder.query({
+            query: (categoryId) => `item/category/${categoryId}`,
+            providesTags: ['Items']
+        }),
+        getUserItem: builder.query({
+            query: (categoryId) => 'item/user',
+            providesTags: ['Items']
+        }),
+        getItemById: builder.query({
+            query: (id) => `/item/id/${id}`,
+            providesTags: ['Items']
+        }),
+    }
     )
 })
 
-export const {useReportItemMutation, useGetItemMutation, useGetItemByCategoryMutation, useGetUserItemMutation, useGetItemByIdMutation} = itemsApiSlice;
+export const { useReportItemMutation, useUpdateItemMutation, useGetItemsQuery,useGetItemsByCategoryQuery, useGetUserItemQuery, useGetItemByIdQuery } = itemsApiSlice;

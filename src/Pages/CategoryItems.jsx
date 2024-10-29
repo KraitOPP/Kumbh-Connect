@@ -1,6 +1,6 @@
 import ItemCard from "@/components/ItemCard";
 import { useEffect, useState } from "react";
-import { useGetItemByCategoryMutation } from "@/slices/itemSlice";
+import { useGetItemsByCategoryQuery } from "@/slices/itemSlice";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Link, useParams } from "react-router-dom";
@@ -9,36 +9,27 @@ import { Button } from "@/components/ui/button";
 
 
 export default function CategoryItems() {
-  const [getCategoryItems, { isLoading }] = useGetItemByCategoryMutation();
-  const [category, setCategory] = useState(null);
-  const [items, setItems] = useState([]);
   const { categoryId } = useParams();
+  const { data, isLoading, error, refetch } = useGetItemsByCategoryQuery(categoryId);
+  const items = data?.items || [];
+  const [category, setCategory] = useState(null);
 
   useEffect(() => {
-    const fetchCategoryItems = async () => {
-      try {
-        const res = await getCategoryItems(categoryId).unwrap();
-        if (res.success) {
-          setCategory(res.category);
-          setItems(res.items);
-        } else {
-          toast({
-            title: "Failed to Load Items",
-            description: res.message,
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        toast({
-          title: "Failed to Load Items",
-          description: error?.data?.message || "An unexpected error occurred.",
-          variant: "destructive",
-        });
-      }
-    };
+    if (error) {
+      toast({
+        title: "Failed to Load Items",
+        description: error?.data?.message || "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
-    fetchCategoryItems();
-  }, [categoryId]);
+  useEffect(() => {
+    if (items || data) {
+      setCategory(data?.category);
+    }
+  }, [items, data]);
+
 
   if (isLoading) {
     return (
@@ -50,7 +41,7 @@ export default function CategoryItems() {
 
   return (
     <div className="m-5 flex justify-center items-center flex-col gap-5">
-        <Card className="sm:col-span-2 w-full" x-chunk="dashboard-05-chunk-0">
+      <Card className="sm:col-span-2 w-full" x-chunk="dashboard-05-chunk-0">
         <CardHeader className="pb-3">
           <CardTitle>Report Lost/Found Item</CardTitle>
           <CardDescription className="max-w-lg text-balance leading-relaxed">
