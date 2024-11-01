@@ -2,7 +2,7 @@ const User = require("../Models/user");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { z } = require("zod");
-const sendMail = require("../Utils/sendVerificationCode");
+const { sendResetPasswordMail } = require("../Utils/sendVerificationCode");
 
 const userSchemaValidate = z.object({
     firstName: z
@@ -186,7 +186,7 @@ const handleSendVerificationCode = async(req,res)=>{
             const foundUser = await User.findOne({email:email});
             if(foundUser){
                 const verifyCode = Math.floor(100000+Math.random()*900000).toString();
-                await sendMail(verifyCode,email);
+                await sendResetPasswordMail(email, verifyCode);
                 foundUser.verifyCodeExpiry = new Date(Date.now()+3600000);
                 foundUser.verifyCode = verifyCode;
                 await foundUser.save();

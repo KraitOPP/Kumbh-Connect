@@ -4,7 +4,6 @@ const User = require("../Models/user");
 const isAuthenticated = async (req, res, next) => {
   try {
     let token = req.body.token || req.headers.authorization;
-
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -50,7 +49,6 @@ const isAdmin = async (req, res, next) => {
         message: "Unauthorized",
       });
     }
-
     next();
 
   } catch (error) {

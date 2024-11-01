@@ -45,11 +45,10 @@ const itemUpdateSchemaValidate = z.object({
         required_error: "Item Status is required",
         invalid_type_error: "Invalid Item Status",
     }),
-    returnedTo: z
-    .string({ required_error: "User ID is required" })
-    .regex(/^[0-9a-fA-F]{24}$/, { message: "Invalid User ObjectId" }),
-    returnedOn: z.date().optional(),
-    returnedToOwner: z.boolean({required_error:"Return Status Required", message:"Invalid Boolean for Return Status"}),
+    name: z
+    .string({ required_error: "Name is required" }),
+    description: z
+    .string({ required_error: "Description is required" })
 });
 
 
@@ -119,25 +118,18 @@ const handleUpdateItem = async (req, res) => {
             });
         }
 
-        const { name, description, category, images, status, reportedBy } = req.body;
-
-        const validate = itemSchemaValidate.safeParse({
+        const { name, description, status } = req.body;
+        const validate = itemUpdateSchemaValidate.safeParse({
             name,
             description,
-            category,
-            images,
             status,
-            reportedBy,
         });
 
         if (validate.success) {
             const updateFields = {
                 name,
                 description,
-                category,
-                images,
                 status,
-                reportedBy,
             };
 
             const item = await Item.findByIdAndUpdate(itemId, { $set: updateFields }, { new: true });
@@ -226,16 +218,16 @@ const handleUpdateItemStatus = async (req, res) => {
 
 const handleDeleteItem = async(req,res)=>{
     try {
+        const user = req.user;
         const itemId = req.params.id;
-
         if(!itemId){
             return res.status(409).json({
                 success:false,
                 message:"Invalid Item Id.",
             })
         }
-        
-        const item = await Item.findByIdAndDelete(itemId);
+
+        const item = await Item.findById(itemId);
 
         if(!item){
             return res.status(409).json({
@@ -243,12 +235,25 @@ const handleDeleteItem = async(req,res)=>{
                 message:"Item not Found.",
             })
         }
-        else{
-            return res.status(200).json({
-                success:true,
-                message:"Item Deleted Successfully.",
-            }) 
+
+        if(user.role !== 'admin' && item.reportedBy.toString() !== user._id.toString()){
+            return res.status(401).json({
+                success:false,
+                message:"Unauthorized Access.",
+            })
         }
+
+        await Item.findByIdAndDelete(itemId);
+        await User.findByIdAndUpdate(user._id, {
+            $pull: {lostItems: itemId, foundItems: itemId}
+        })
+        
+        
+        return res.status(200).json({
+            success:true,
+            message:"Item Deleted Successfully.",
+        }) 
+        
 
     } catch (error) {
         console.error("Error Deleting Item",error);
@@ -504,8 +509,8 @@ const handleGetItemsOfACategory = async(req,res)=>{
         return res.status(200).json({
             success: true,
             message: "Items Fetched By Category Successfully",
-            items:items[0].items,
-            category:items[0].categoryDetails
+            items:items[0]?.items,
+            category:items[0]?.categoryDetails
         }); 
     } catch (error) {
         console.error("Error Fetching Category Items",error);

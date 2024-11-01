@@ -21,6 +21,6 @@ router.get('/user',isAuthenticated, handleGetItemofUser);
 router.post('/', isAuthenticated, handleAddItem);
 router.put('/status/:id', isAuthenticated, isAdmin, handleUpdateItemStatus);
 router.put('/:id', isAuthenticated, isAdmin, handleUpdateItem);
-router.delete('/:id', isAuthenticated, isAdmin, handleDeleteItem);
+router.delete('/:id', isAuthenticated, handleDeleteItem);
 
 module.exports = router;
