@@ -1,42 +1,51 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Loader, Loader2, MapPin, User, Calendar, Tag, Check, X } from "lucide-react";
+import { Loader2, MapPin, User, Calendar, Tag, Check, X, ArrowLeft } from "lucide-react";
 import { PhotoProvider, PhotoView } from 'react-photo-view';
-import {  useGetItemByIdQuery } from "@/slices/itemSlice";
+import { useGetItemByIdQuery } from "@/slices/itemSlice";
 import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import MapComponent from "@/components/map";
 import 'react-photo-view/dist/react-photo-view.css';
+import { useClaimItemMutation } from "@/slices/claimItemSlice";
 
 const ImageGallery = ({ images, currentIndex, onImageSelect, imageLoading, setImageLoading }) => (
-  <div className="grid gap-4">
-    <div className="flex gap-2 overflow-x-auto pb-2">
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="grid gap-4"
+  >
+    <div className="pl-2 pt-2 flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
       {images.map((image, index) => (
-        <button
+        <motion.button
           key={index}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => onImageSelect(index)}
-          className={`flex-shrink-0 transition-all duration-200 ${
+          className={`flex-shrink-0 transition-all duration-200 rounded-lg overflow-hidden ${
             currentIndex === index 
-              ? 'ring-2 ring-blue-500 ring-offset-2'
+              ? 'ring-2 ring-primary ring-offset-2'
               : 'hover:opacity-80'
           }`}
         >
           <img
             src={image.url || '/api/placeholder/100/100'}
             alt={`Thumbnail ${index + 1}`}
-            className="h-16 w-16 rounded-lg object-cover"
+            className="h-16 w-16 object-cover"
           />
-        </button>
+        </motion.button>
       ))}
     </div>
 
-    <div className="relative rounded-lg overflow-hidden bg-gray-100">
+    <div className="relative rounded-xl overflow-hidden bg-gray-100 shadow-lg">
       {imageLoading && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80 backdrop-blur-sm">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       )}
       <PhotoView src={images[currentIndex]?.url || '/api/placeholder/600/600'}>
@@ -53,135 +62,211 @@ const ImageGallery = ({ images, currentIndex, onImageSelect, imageLoading, setIm
         </AspectRatio>
       </PhotoView>
     </div>
-  </div>
+  </motion.div>
 );
 
-const ItemStatus = ({ status, returnedToOwner }) => (
-  <div className="flex gap-2 items-center">
-    <Badge variant={status === 'lost' ? 'destructive' : 'success'} className="text-sm">
-      {status.toUpperCase()}
-    </Badge>
-    {returnedToOwner ? (
-      <Badge variant="outline" className="gap-1">
-        <Check className="w-3 h-3" /> Returned to Owner
+const ItemStatus = ({ status, returnedToOwner, returnedTo }) => (
+    <div className="flex gap-2 items-center flex-wrap">
+      <Badge variant={status === 'lost' ? 'destructive' : 'success'} className="text-sm font-medium">
+        {status.toUpperCase()}
       </Badge>
-    ) : (
-      <Badge variant="outline" className="gap-1">
-        <X className="w-3 h-3" /> Not Yet Returned
-      </Badge>
-    )}
-  </div>
-);
+      {returnedToOwner ? (
+        <Badge variant="outline" className="gap-2">
+          <Check className="w-3 h-3" /> 
+          Returned to 
+          <span className="font-semibold">
+            {returnedTo 
+              ? `${returnedTo.firstName} ${returnedTo.lastName}` 
+              : 'Owner'}
+          </span>
+        </Badge>
+      ) : (
+        <Badge variant="outline" className="gap-1">
+          <X className="w-3 h-3" /> Not Yet Returned
+        </Badge>
+      )}
+    </div>
+  );
+  
 
 const ItemPage = () => {
     const { itemId } = useParams();
-    const { data, isLoading, error, refetchItem } = useGetItemByIdQuery(itemId);
-    const item = data?.item || [];
+    const { data, isLoading, error } = useGetItemByIdQuery(itemId);
+    const item = data?.item;
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [imageLoading, setImageLoading] = useState(true);
+    const [claimItem, { isLoading: isClaiming }] = useClaimItemMutation();
 
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: "Failed to Load Item",
-        description: error?.data?.message || "An unexpected error occurred.",
-        variant: "destructive",
-      });
-    }
-  }, [error, toast]);
+    const handleClaimItem = async () => {
+        try {
+            const res = await claimItem({item:item._id}).unwrap();
+            if (res.success) {
+                toast({
+                    title: "Claim Request Submitted Successfully",
+                    className: "bg-green-50 border-green-200",
+                });
+            } else {
+                toast({
+                    title: "Failed to Submit Claim Request",
+                    description: res.message,
+                    variant: "destructive",
+                });
+            }
+        } catch (err) {
+            toast({
+                title: "Failed to Submit Claim Request",
+                description: err?.data?.message || "An unexpected error occurred.",
+                variant: "destructive",
+            });
+        }
+    };
 
-  if (isLoading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-      </div>
-    );
-  }
+    useEffect(() => {
+        if (error) {
+            toast({
+                title: "Failed to Load Item",
+                description: error?.data?.message || "An unexpected error occurred.",
+                variant: "destructive",
+            });
+        }
+    }, [error]);
 
-  if (!item) {
-    return (
-      <Card className="m-8">
-        <CardContent className="p-8 text-center text-gray-500">
-          Item not found or has been removed.
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <PhotoProvider>
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-8">
-          <ImageGallery
-            images={item.images}
-            currentIndex={currentImageIndex}
-            onImageSelect={(index) => {
-              setCurrentImageIndex(index);
-              setImageLoading(true);
-            }}
-            imageLoading={imageLoading}
-            setImageLoading={setImageLoading}
-          />
-
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">{item.name}</h1>
-              <ItemStatus status={item.status} returnedToOwner={item.returnedToOwner} />
+    if (isLoading) {
+        return (
+            <div className="flex h-96 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
+        );
+    }
 
-            <Tabs defaultValue="description" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="description">Description</TabsTrigger>
-                <TabsTrigger value="details">Details</TabsTrigger>
-                <TabsTrigger value="location">Location</TabsTrigger>
-              </TabsList>
+    if (!item) {
+        return (
+            <Card className="m-8">
+                <CardContent className="p-8 text-center text-gray-500">
+                    Item not found or has been removed.
+                </CardContent>
+            </Card>
+        );
+    }
 
-              <TabsContent value="description" className="space-y-4">
-                <Link
-                  to={`/category/${item.category._id}`}
-                  className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800"
+    const canClaim = item.status === 'found' && !item.returnedToOwner;
+
+    return (
+        <PhotoProvider>
+            <div className="container mx-auto px-4 py-8">
+                <Link 
+                    to="/"
+                    className="inline-flex items-center gap-2 text-gray-600 hover:text-primary mb-6 transition-colors"
                 >
-                  <Tag className="h-4 w-4" />
-                  {item.category.name}
+                    <ArrowLeft className="h-4 w-4" />
+                    Back to Items
                 </Link>
-                <p className="text-gray-600">{item.description}</p>
-              </TabsContent>
+                
+                <div className="grid lg:grid-cols-2 gap-12">
+                    <ImageGallery
+                        images={item.images}
+                        currentIndex={currentImageIndex}
+                        onImageSelect={(index) => {
+                            setCurrentImageIndex(index);
+                            setImageLoading(true);
+                        }}
+                        imageLoading={imageLoading}
+                        setImageLoading={setImageLoading}
+                    />
 
-              <TabsContent value="details" className="space-y-4">
-                <div className="grid gap-4">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-gray-500" />
-                    <span>Reported by: {item.reportedBy?.firstName} {item.reportedBy?.lastName}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-gray-500" />
-                    <span>Date Reported: {new Date(item.dateReported).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Tag className="h-4 w-4 text-gray-500" />
-                    <span>Category: {item.category.name}</span>
-                  </div>
-                </div>
-              </TabsContent>
+                    <motion.div 
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="space-y-8"
+                    >
+                        <div className="space-y-4">
+                            <h1 className="text-4xl font-bold">{item.name}</h1>
+                            <ItemStatus status={item.status} returnedToOwner={item.returnedToOwner} returnedTo={item.returnedTo} />
+                        </div>
 
-              <TabsContent value="location" className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-gray-500" />
-                  <span>Last Known Location</span>
+                        <Tabs defaultValue="description" className="w-full">
+                            <TabsList className="grid w-full grid-cols-3 mb-6">
+                                <TabsTrigger value="description">Description</TabsTrigger>
+                                <TabsTrigger value="details">Details</TabsTrigger>
+                                <TabsTrigger value="location">Location</TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="description" className="space-y-6">
+                                <Link
+                                    to={`/category/${item.category._id}`}
+                                    className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
+                                >
+                                    <Tag className="h-4 w-4" />
+                                    {item.category.name}
+                                </Link>
+                                <p className="text-gray-600 leading-relaxed">{item.description}</p>
+                                {canClaim && (
+                                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                                        <Button
+                                            onClick={handleClaimItem}
+                                            disabled={isClaiming}
+                                            className="w-full sm:w-auto min-w-[120px]"
+                                            size="lg"
+                                        >
+                                            {isClaiming ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Claiming...
+                                                </>
+                                            ) : (
+                                                'Claim Item'
+                                            )}
+                                        </Button>
+                                    </motion.div>
+                                )}
+                            </TabsContent>
+
+                            <TabsContent value="details">
+                                <Card>
+                                    <CardContent className="grid gap-6 p-6">
+                                        <div className="flex items-center gap-3">
+                                            <User className="h-5 w-5 text-primary" />
+                                            <div>
+                                                <div className="text-sm text-gray-500">Reported by</div>
+                                                <div className="font-medium">{item.reportedBy?.firstName} {item.reportedBy?.lastName}</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <Calendar className="h-5 w-5 text-primary" />
+                                            <div>
+                                                <div className="text-sm text-gray-500">Date Reported</div>
+                                                <div className="font-medium">{new Date(item.dateReported).toLocaleDateString()}</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <Tag className="h-5 w-5 text-primary" />
+                                            <div>
+                                                <div className="text-sm text-gray-500">Category</div>
+                                                <div className="font-medium">{item.category.name}</div>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+
+                            <TabsContent value="location" className="space-y-4">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <MapPin className="h-5 w-5 text-primary" />
+                                    <span className="font-medium">Last Known Location</span>
+                                </div>
+                                <div className="h-[400px] rounded-xl overflow-hidden border border-gray-200 shadow-lg">
+                                    <MapComponent
+                                        latitude={item.location.latitude}
+                                        longitude={item.location.longitude}
+                                    />
+                                </div>
+                            </TabsContent>
+                        </Tabs>
+                    </motion.div>
                 </div>
-                <div className="h-[400px] rounded-lg overflow-hidden border border-gray-200">
-                  <MapComponent
-                    latitude={item.location.latitude}
-                    longitude={item.location.longitude}
-                  />
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
-      </div>
-    </PhotoProvider>
-  );
+            </div>
+        </PhotoProvider>
+    );
 };
 
 export default ItemPage;

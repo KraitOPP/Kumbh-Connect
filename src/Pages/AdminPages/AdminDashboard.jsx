@@ -10,7 +10,7 @@ import {
   AlertCircle,
   ArrowUpRight
 } from "lucide-react";
-import {  useGetItemsQuery } from "@/slices/itemSlice";
+import {  useDeleteItemMutation, useGetItemsQuery } from "@/slices/itemSlice";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,9 +66,34 @@ const QuickAction = ({ title, description, icon: Icon, to }) => (
 );
 
 const AdminDashboardPage = () => {
+  const [deleteItem] = useDeleteItemMutation();
   const { data, isLoading, error, refetch } = useGetItemsQuery();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+
+
+  const handleDeleteItem = async (itemId) => {
+    try {
+        const res = await deleteItem(itemId).unwrap();
+        if (res.success) {
+            toast({
+                title: "Item Deleted Succesfully",
+            });
+        } else {
+            toast({
+                title: "Failed to Delete Item",
+                description: res.message,
+                variant: "destructive",
+            });
+        }
+    } catch (error) {
+        toast({
+            title: "Failed to Delete Item",
+            description: error?.data?.message || "An unexpected error occurred.",
+            variant: "destructive",
+        });
+    }
+}
 
   useEffect(() => {
     if (error) {
@@ -197,7 +222,7 @@ const AdminDashboardPage = () => {
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
             ) : (
-              <Items items={filteredItems} refetch={refetch} />
+              <Items items={filteredItems} onDeleteItem={handleDeleteItem} refetch={refetch} />
             )}
           </CardContent>
           <CardFooter className="flex justify-between">

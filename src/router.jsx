@@ -15,6 +15,8 @@ import ReportItemPage  from './Pages/UserPages/reportItem';
 import CategoryItems from './Pages/CategoryItems';
 import ItemPage from './Pages/Item';
 import UserListingPage from './Pages/AdminPages/UsersPage/users-listing-page';
+import ClaimItemsListingPage from './Pages/AdminPages/ClaimItem/claimItemsPage';
+import ClaimPage from './Pages/AdminPages/ClaimPage';
 
 
 export const router = createBrowserRouter([
@@ -51,6 +53,14 @@ export const router = createBrowserRouter([
         {
           path: "users",
           element:<UserListingPage />
+        },
+        {
+          path: "claims/:id",
+          element:<ClaimPage />
+        },
+        {
+          path: "claims",
+          element:<ClaimItemsListingPage />
         },
         {
           path: "category/add-new",

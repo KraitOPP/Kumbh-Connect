@@ -19,7 +19,7 @@ import { useGetProfileQuery, useUpdateProfileMutation } from "@/slices/userApiSl
 import { toast } from "@/components/ui/use-toast";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/slices/authSlice";
-import {  useGetUserItemQuery } from "@/slices/itemSlice";
+import {  useDeleteItemMutation, useGetUserItemQuery } from "@/slices/itemSlice";
 import Items from "@/components/Items";
 
 const userSchemaUpdateValidate = z.object({
@@ -48,6 +48,7 @@ export const ProfilePage = () => {
     const [isEditing, setIsEditing] = useState(false);
     const { data: ItemsData, isLoading: isFetchingItems, errorInFetchingItems, refetchItem } = useGetUserItemQuery();
     const items = ItemsData?.items || [];
+    const [deleteItem] = useDeleteItemMutation();
 
     const form = useForm({
         resolver: zodResolver(userSchemaUpdateValidate),
@@ -65,6 +66,29 @@ export const ProfilePage = () => {
             },
         },
     });
+
+    const handleDeleteItem = async (itemId) => {
+        try {
+            const res = await deleteItem(itemId).unwrap();
+            if (res.success) {
+                toast({
+                    title: "Item Deleted Succesfully",
+                });
+            } else {
+                toast({
+                    title: "Failed to Delete Item",
+                    description: res.message,
+                    variant: "destructive",
+                });
+            }
+        } catch (error) {
+            toast({
+                title: "Failed to Delete Item",
+                description: error?.data?.message || "An unexpected error occurred.",
+                variant: "destructive",
+            });
+        }
+    }
 
     useEffect(() => {
         if (error) {
@@ -314,7 +338,7 @@ export const ProfilePage = () => {
                                 <Loader2 className="animate-spin text-gray-600" size={40} />
                             </div>
                         ) : (
-                            <Items items={items} />
+                            <Items items={items} onDeleteItem={handleDeleteItem} refetch={refetch} />
                         )}
                     </TabsContent>
                 </Tabs>

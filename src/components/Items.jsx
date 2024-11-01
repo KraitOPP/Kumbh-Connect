@@ -11,6 +11,7 @@ import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
+    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
@@ -28,22 +29,28 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { differenceInDays } from "date-fns";
-import { useUpdateItemMutation } from '@/slices/itemSlice';
-import { useToast } from './ui/use-toast';
-import EditItemForm from './editItemForm';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { toast } from './ui/use-toast';
 
-
-export default function Items({ items }) {
-
-    const [updateItem, { isLoading }] = useUpdateItemMutation();
-    const [selectedItem, setSelectedItem] = useState(null);
-    const { toast } = useToast();
+const ItemsTable = ({ items, onDeleteItem }) => {
     const [filters, setFilters] = useState({
         found: true,
         lost: true,
         returned: true,
     });
     const [timeFilter, setTimeFilter] = useState("month");
+    const [isDeleting, setIsDeleting] = useState(false);
+
     const handleFilterChange = (filter) => {
         setFilters((prevFilter) => ({
             ...prevFilter,
@@ -54,7 +61,6 @@ export default function Items({ items }) {
     const handleTimeFilterChange = (value) => {
         setTimeFilter(value);
     };
-
 
     const filterItems = (items, timeFilter, statusFilters) => {
         const now = new Date();
@@ -75,27 +81,12 @@ export default function Items({ items }) {
     };
 
     const filteredItems = filterItems(items, timeFilter, filters);
-    const handleEditItem = async (itemId, updatedData) => {
-        try {
-            const response = await updateItem({_id: itemId,item: updatedData}).unwrap();
 
-            if (response.success) {
-                toast({
-                    title: "Success",
-                    description: "Item updated successfully",
-                });
-                setSelectedItem(null);
-            }
-
-        } catch (error) {
-            toast({
-                title: "Error",
-                description: error?.data?.message || "Failed to update item",
-                variant: "destructive",
-            });
-        }
+    const confirmDeleteItem = async (itemId) => {
+        setIsDeleting(true);
+        await onDeleteItem(itemId);
+        setIsDeleting(false);
     };
-
 
     return (
         <div className="min-h-[60vh] grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-3">
@@ -149,7 +140,7 @@ export default function Items({ items }) {
                     </div>
                 </div>
                 <TabsContent value={timeFilter}>
-                    <Card x-chunk="dashboard-05-chunk-3">
+                    <Card>
                         <CardHeader className="px-7">
                             <CardTitle>Items</CardTitle>
                             <CardDescription>
@@ -227,39 +218,54 @@ export default function Items({ items }) {
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent align="end">
                                                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                            <DropdownMenuItem
-                                                                onClick={() => setSelectedItem(item)}
-                                                                onSelect={(e) => e.preventDefault()}
-                                                            >
-                                                                Edit
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem>Delete</DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuGroup>
+                                                                <AlertDialog>
+                                                                    <AlertDialogTrigger asChild>
+                                                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                                            Delete
+                                                                        </DropdownMenuItem>
+                                                                    </AlertDialogTrigger>
+                                                                    <AlertDialogContent>
+                                                                        <AlertDialogHeader>
+                                                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                                            <AlertDialogDescription>
+                                                                                This action cannot be undone. This will permanently delete this item
+                                                                                and remove item data from our servers.
+                                                                            </AlertDialogDescription>
+                                                                        </AlertDialogHeader>
+                                                                        <AlertDialogFooter>
+                                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                            <AlertDialogAction
+                                                                                variant="destructive"
+                                                                                onClick={() => confirmDeleteItem(item._id)}
+                                                                                disabled={isDeleting}
+                                                                            >
+                                                                                {isDeleting ? 'Deleting...' : 'Delete'}
+                                                                            </AlertDialogAction>
+                                                                        </AlertDialogFooter>
+                                                                    </AlertDialogContent>
+                                                                </AlertDialog>
+                                                            </DropdownMenuGroup>
                                                         </DropdownMenuContent>
                                                     </DropdownMenu>
                                                 </TableCell>
                                             </TableRow>
-                                        )) : <>
+                                        )) : (
                                             <TableRow>
                                                 <TableCell colSpan={7} className="h-24 text-center">
                                                     No items found.
                                                 </TableCell>
                                             </TableRow>
-                                        </>}
+                                        )}
                                 </TableBody>
                             </Table>
                         </CardContent>
                     </Card>
                 </TabsContent>
             </Tabs>
-            {selectedItem && (
-                <EditItemForm
-                    item={selectedItem}
-                    isOpen={!!selectedItem}
-                    onClose={() => setSelectedItem(null)}
-                    onSave={handleEditItem}
-                    isLoading={isLoading}
-                />
-            )}
         </div>
-    )
-}
+    );
+};
+
+export default ItemsTable;

@@ -1,10 +1,21 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, ArrowRight } from 'lucide-react';
+import { Calendar, ArrowRight, Tag } from 'lucide-react';
+
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'lost': return 'bg-red-100 text-red-800';
+    case 'found': return 'bg-yellow-100 text-yellow-800';
+    case 'returned': return 'bg-green-100 text-green-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+};
 
 const ItemCard = ({ item }) => {
   if (!item) return null;
+
+  const statusColor = getStatusColor(item.status);
 
   return (
     <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-xl flex flex-col h-full">
@@ -17,10 +28,19 @@ const ItemCard = ({ item }) => {
           />
         </div>
         
-        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full shadow-sm">
-          <div className="flex items-center space-x-1 text-sm text-gray-600">
-            <Calendar className="w-4 h-4" />
-            <span>{new Date(item.dateReported).toLocaleDateString()}</span>
+        <div className="absolute top-4 right-4 space-x-2 flex">
+          {item.status && (
+            <div className={`${statusColor} px-3 py-1 rounded-full shadow-sm flex items-center space-x-1 text-sm`}>
+              <Tag className="w-4 h-4" />
+              <span className="capitalize">{item.status}</span>
+            </div>
+          )}
+
+          <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full shadow-sm">
+            <div className="flex items-center space-x-1 text-sm text-gray-600">
+              <Calendar className="w-4 h-4" />
+              <span>{new Date(item.dateReported).toLocaleDateString()}</span>
+            </div>
           </div>
         </div>
       </div>

@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react';
-import { buttonVariants } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
-import { Plus } from 'lucide-react';
 import UsersTable from './usersTable.jsx';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 export default function UsersListingPage() {

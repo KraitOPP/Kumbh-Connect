@@ -38,6 +38,13 @@ export const columns = [
     header: 'PHONE'
   },
   {
+    accessorKey: 'registeredAt',
+    header: 'Date Registered',
+    cell: ({ row }) => (
+      <div>{new Date(row.original.registeredAt).toDateString()}</div>
+    )
+  },
+  {
     id: 'actions',
     cell: ({ row }) => <CellAction data={row.original} />
   }

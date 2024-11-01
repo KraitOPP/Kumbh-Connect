@@ -30,7 +30,6 @@ export default function CategoryItems() {
     }
   }, [items, data]);
 
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center">

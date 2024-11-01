@@ -7,13 +7,21 @@ const itemsApiSlice = apiSlice.injectEndpoints({
                 url: '/item/',
                 method: 'POST',
                 body: data,
-            })
+            }),
+            invalidatesTags: ['Items']
         }),
         updateItem: builder.mutation({
             query: ({ _id, item }) => ({
                 url: `item/${_id}`,
                 method: 'PUT',
                 body: item
+            }),
+            invalidatesTags: ['Items']
+        }),
+        deleteItem: builder.mutation({
+            query: (_id) => ({
+                url: `item/${_id}`,
+                method: 'DELETE',
             }),
             invalidatesTags: ['Items']
         }),
@@ -26,7 +34,7 @@ const itemsApiSlice = apiSlice.injectEndpoints({
             providesTags: ['Items']
         }),
         getUserItem: builder.query({
-            query: (categoryId) => 'item/user',
+            query: () => 'item/user',
             providesTags: ['Items']
         }),
         getItemById: builder.query({
@@ -37,4 +45,4 @@ const itemsApiSlice = apiSlice.injectEndpoints({
     )
 })
 
-export const { useReportItemMutation, useUpdateItemMutation, useGetItemsQuery,useGetItemsByCategoryQuery, useGetUserItemQuery, useGetItemByIdQuery } = itemsApiSlice;
+export const { useReportItemMutation, useUpdateItemMutation, useGetItemsQuery,useGetItemsByCategoryQuery, useGetUserItemQuery, useGetItemByIdQuery, useDeleteItemMutation } = itemsApiSlice;

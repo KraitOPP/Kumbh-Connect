@@ -48,6 +48,11 @@ export const navItems = [
           isActive: false,
         },
         {
+          title: 'Claims',
+          url: '/dashboard/claims',
+          isActive: false,
+        },
+        {
           title: 'Users',
           url: '/dashboard/users',
           isActive: false,
