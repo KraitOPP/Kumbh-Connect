@@ -154,7 +154,7 @@ const handleGetProfile = async (req,res)=>{
     }
 }
 
-const handleGetUsers = async (req, res) => {
+const handleGetUsersByQuery = async (req, res) => {
     try {
         const { search, page = 1, limit = 10 } = req.query;
 
@@ -189,9 +189,26 @@ const handleGetUsers = async (req, res) => {
 
         return res.status(200).json({
             users,
-            totalUsers,
             currentPage: pageNumber,
+            totalUsers,
             totalPages: Math.ceil(totalUsers / pageSize),
+        });
+    } catch (error) {
+        console.error("Error Fetching Users Details",error);
+        return res.status(500).json({
+            success:false,
+            message: "Internal Server Issue, Please try again!",
+        });
+    }
+};
+
+const handleGetUsers = async (req, res) => {
+    try {
+        const users = await User.find({}).sort({ registeredAt: -1 }).select('-password -__v');
+        const totalUsers = await User.countDocuments();
+        return res.status(200).json({
+            users,
+            totalUsers,
         });
     } catch (error) {
         console.error("Error Fetching Users Details",error);
@@ -206,4 +223,4 @@ const handleGetUsers = async (req, res) => {
 
 
 
-module.exports = {handleGetProfile, handleUpdateUser, handleGetUsers};
+module.exports = {handleGetProfile, handleUpdateUser, handleGetUsersByQuery, handleGetUsers};

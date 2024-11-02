@@ -230,12 +230,11 @@ const handleGetClaims = async (req, res) => {
             pipeline.push({
                 $match: {
                     $or: [
-                        { status: searchRegex },
+                        { 'status': searchRegex },
                         { 'claimBy.firstName': searchRegex },
                         { 'claimBy.lastName': searchRegex },
                         { 'claimBy.email': searchRegex },
                         { 'item.name': searchRegex },
-                        { 'item.category': searchRegex },
                         { 'item.description': searchRegex }
                     ]
                 }

@@ -75,14 +75,7 @@ const handleAddItem = async(req,res)=>{
                 status,
                 reportedBy,
             });
-            if(status=='lost'){
-                user.lostItems.push(item._id);
-            }
-            else if(status=='found'){
-                user.foundItems.push(item._id);
-            }
             await item.save();
-            await user.save();
 
 
             return res.status(201).json({
@@ -164,7 +157,7 @@ const handleUpdateItem = async (req, res) => {
 const handleUpdateItemStatus = async (req, res) => {
     try {
         const id = req.params.id;
-
+        
         const itemId = mongooseIdVerify.safeParse(id).success ? id : null;
         if (!itemId) {
             return res.status(404).json({
@@ -172,40 +165,44 @@ const handleUpdateItemStatus = async (req, res) => {
                 message: "Item not Found.",
             });
         }
-
-        const { status, returnedTo, returnedToOwner } = req.body;
-
-        const validate = itemUpdateSchemaValidate.safeParse({status, returnedTo, returnedToOwner});
-
-        if (validate.success) {
-            const returnedOn = new Date();
-            const updateFields = {
-                status,
-                returnedTo,
-                returnedOn,
-                returnedToOwner
-            };
-
-            const item = await Item.findByIdAndUpdate(itemId, { $set: updateFields }, { new: true });
-
-            if (!item) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Item not found.",
-                });
-            }
-
-            return res.status(200).json({
-                success: true,
-                message: "Item Status Updated Successfully",
-                item,
-            });
-        } else {
+        
+        const { returnedTo } = req.body;
+        
+        if (!returnedTo) {
             return res.status(400).json({
                 success: false,
-                message: validate.error.issues.map((err) => err.message).join(", "),
+                message: "Person whom item is returned is required",
             });
         }
+        
+        const originalItem = await Item.findById(itemId).populate('reportedBy returnedTo');
+        if (!originalItem) {
+            return res.status(404).json({
+                success: false,
+                message: "Item not found.",
+            });
+        }
+
+        const returnedOn = new Date();
+        const updateFields = {
+            status: 'returned',
+            returnedTo,
+            returnedOn,
+            returnedToOwner: true
+        };
+        
+        const item = await Item.findByIdAndUpdate(itemId, { $set: updateFields }, { new: true });
+        
+        if (originalItem.status === 'lost') {
+            await sendReturnMail(item);
+        }
+        
+        return res.status(200).json({
+            success: true,
+            message: "Item Status Updated Successfully",
+            item,
+        });
+        
     } catch (error) {
         console.error("Error Updating Item Status", error);
         return res.status(500).json({
@@ -244,10 +241,6 @@ const handleDeleteItem = async(req,res)=>{
         }
 
         await Item.findByIdAndDelete(itemId);
-        await User.findByIdAndUpdate(user._id, {
-            $pull: {lostItems: itemId, foundItems: itemId}
-        })
-        
         
         return res.status(200).json({
             success:true,
@@ -577,5 +570,105 @@ const handleGetItemById = async (req,res)=>{
     }
 }
 
+const handleGetItemByQuery = async (req, res) => {
+    try {
+        const { search, page = 1, limit = 10 } = req.query;
 
-module.exports = {handleAddItem,handleUpdateItem, handleDeleteItem, handleUpdateItemStatus, handleGetItems, handleGetItemsByCategory, handleGetItemsOfACategory, handleGetItemofUser, handleGetItemById};
+        const pageNumber = parseInt(page);
+        const pageSize = parseInt(limit);
+        const skip = (pageNumber - 1) * pageSize;
+
+        const pipeline = [
+            {
+                $lookup: {
+                    from: "users", 
+                    localField: "reportedBy",
+                    foreignField: "_id",
+                    as: "reportedBy"
+                }
+            },
+            {
+                $unwind: "$reportedBy"
+            },
+            {
+                $lookup: {
+                    from: "categories", 
+                    localField: "category",
+                    foreignField: "_id",
+                    as: "category"
+                }
+            },
+            {
+                $unwind: "$category"
+            }
+        ];
+
+        if (search) {
+            const searchRegex = new RegExp(search, 'i');
+            pipeline.push({
+                $match: {
+                    $or: [
+                        { 'name': searchRegex },
+                        { 'description': searchRegex },
+                        { 'status': searchRegex },
+                        { 'category.name': searchRegex },
+                        { 'reportedBy.firstName': searchRegex },
+                        { 'reportedBy.phoneNumber': searchRegex },
+                        { 'reportedBy.email': searchRegex },
+                    ]
+                }
+            });
+        }
+
+        pipeline.push({
+            $sort: { dateReported: -1 }
+        });
+
+        const countPipeline = [...pipeline];
+        
+        pipeline.push(
+            { $skip: skip },
+            { $limit: pageSize }
+        );
+
+        const items = await Item.aggregate(pipeline);
+
+        const totalItemsArray = await Item.aggregate([
+            ...countPipeline,
+            { $count: 'total' }
+        ]);
+        
+        const totalItems = totalItemsArray.length > 0 ? totalItemsArray[0].total : 0;
+
+        if (!items || items.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: "No Items Found",
+                items: [],
+                totalItems: 0,
+                currentPage: pageNumber,
+                totalPages: 0
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Items Fetched Successfully",
+            items,
+            totalItems,
+            currentPage: pageNumber,
+            totalPages: Math.ceil(totalItems / pageSize)
+        });
+
+    } catch (error) {
+        console.error("Error Getting Items", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Issue, Please try again!",
+            error: error.message
+        });
+    }
+};
+
+
+module.exports = {handleAddItem,handleUpdateItem, handleDeleteItem, handleUpdateItemStatus, handleGetItems, handleGetItemsByCategory, handleGetItemsOfACategory, handleGetItemofUser, handleGetItemById, handleGetItemByQuery};

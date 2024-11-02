@@ -63,18 +63,6 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user',
   },
-  foundItems: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Item',
-    },
-  ],
-  lostItems: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Item',
-    },
-  ],
   registeredAt: {
     type: Date,
     default: Date.now,
