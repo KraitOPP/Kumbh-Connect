@@ -7,6 +7,7 @@ import axios from 'axios';
 export default function UsersListingPage() {
   const [users, setUsers] = useState([]);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const getQueryParams = () => {
@@ -27,7 +28,7 @@ export default function UsersListingPage() {
       };
 
       try {
-        const { data } = await axios.get('http://localhost:8001/api/user/all', {
+        const { data } = await axios.get('http://localhost:8001/api/user/q', {
           params: filters,
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -35,7 +36,8 @@ export default function UsersListingPage() {
           withCredentials: true,
         });
         
-        setTotalUsers(data.totalPages);
+        setTotalUsers(data.totalUsers);
+        setTotalPages(data.totalPages);
         setUsers(data.users);
       } catch (error) {
         console.error('Error fetching users:', error);
@@ -60,7 +62,7 @@ export default function UsersListingPage() {
         />
       </div>
       <Separator />
-      <UsersTable data={users} totalData={totalUsers} />
+      <UsersTable data={users} totalData={totalPages} />
     </div>
   );
 }

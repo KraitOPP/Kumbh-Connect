@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
-import ClaimsTable from './ClaimItemsTable';
+import ItemsTable from './ItemsTable';
 import axios from 'axios';
 import { toast } from '@/components/ui/use-toast';
 
-export default function ClaimItemsListingPage() {
-    const [claims, setClaims] = useState([]);
-    const [totalClaims, setTotalClaims] = useState(0);
+export default function ItemsListingPage() {
+    const [items, setItems] = useState([]);
+    const [totalItems, setTotalItems] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
 
     const getQueryParams = () => {
@@ -18,9 +18,9 @@ export default function ClaimItemsListingPage() {
         return { page, search, limit };
     };
 
-    const fetchClaims = useCallback(async () => {
+    const fetchItems = useCallback(async () => {
         try {
-            const response = await axios.get('http://localhost:8001/api/claim', {
+            const response = await axios.get('http://localhost:8001/api/item/q/', {
                 params: getQueryParams(),
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -29,12 +29,12 @@ export default function ClaimItemsListingPage() {
             });
 
             if (response.data.success) {
-                const claimsWithRefresh = response.data.claims.map(claim => ({
-                    ...claim,
-                    refreshData: fetchClaims
+                const itemsWithRefresh = response.data.items.map(item => ({
+                    ...item,
+                    refreshData: fetchItems
                 }));
-                setClaims(claimsWithRefresh);
-                setTotalClaims(response.data.totalClaims);
+                setItems(itemsWithRefresh);
+                setTotalItems(response.data.totalItems);
                 setTotalPages(response.data.totalPages);
             }
         } catch (error) {
@@ -42,13 +42,13 @@ export default function ClaimItemsListingPage() {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: "Failed to fetch claims. Please try again."
+                description: "Failed to fetch items. Please try again."
             });
         }
     }, []);
 
     useEffect(() => {
-        fetchClaims();
+        fetchItems();
     }, [getQueryParams]);
 
 
@@ -56,12 +56,12 @@ export default function ClaimItemsListingPage() {
         <div className="space-y-4 m-5">
             <div className="flex items-start justify-between">
                 <Heading
-                    title={`CLaims (${totalClaims})`}
-                    description="Manage Claims"
+                    title={`Reports (${totalItems})`}
+                    description="Manage Reported Lost/Found Items"
                 />
             </div>
             <Separator />
-            <ClaimsTable data={claims} totalData={totalPages} />
+            <ItemsTable data={items} totalData={totalPages} />
         </div>
     );
 }

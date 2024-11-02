@@ -17,6 +17,7 @@ import ItemPage from './Pages/Item';
 import UserListingPage from './Pages/AdminPages/UsersPage/users-listing-page';
 import ClaimItemsListingPage from './Pages/AdminPages/ClaimItem/claimItemsPage';
 import ClaimPage from './Pages/AdminPages/ClaimPage';
+import ItemsListingPage from './Pages/AdminPages/Items/itemsListing';
 
 
 export const router = createBrowserRouter([
@@ -49,6 +50,10 @@ export const router = createBrowserRouter([
         {
           path: "",
           element:<AdminDashboardPage />
+        },
+        {
+          path: "items",
+          element:<ItemsListingPage />
         },
         {
           path: "users",

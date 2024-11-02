@@ -56,9 +56,9 @@ const HeroSection = () => (
 );
 
 export default function HomePage() {
-  const { data, isLoading: isFetching, errorInFetchingItems, refetchItem } = useGetItemsQuery();
+  const { data, isLoading: isFetching, error: errorInFetchingItems, refetchItem } = useGetItemsQuery();
   const items = data?.items || [];
-  const { data: Catdata, isLoading: isFetchingCategory, errorInFetchingCategories, refetchCategories } = useGetItemCategoryQuery();
+  const { data: Catdata, isLoading: isFetchingCategory, error: errorInFetchingCategories, refetchCategories } = useGetItemCategoryQuery();
   const categories = Catdata?.categories || [];
   const [error, setError] = useState(null);
 

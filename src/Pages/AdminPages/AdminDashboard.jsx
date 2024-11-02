@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { 
-  Loader2, 
-  PlusCircle, 
   LayoutDashboard, 
   Package, 
   Tags,
@@ -10,26 +8,16 @@ import {
   AlertCircle,
   ArrowUpRight
 } from "lucide-react";
-import {  useDeleteItemMutation, useGetItemsQuery } from "@/slices/itemSlice";
+import {  useGetItemsQuery } from "@/slices/itemSlice";
 import { toast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Items from "@/components/Items";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue, 
-} from "@/components/ui/select";
+import ItemsListingPage from "./Items/itemsListing";
 
 const StatsCard = ({ title, value, icon: Icon, trend }) => (
   <Card>
@@ -66,34 +54,7 @@ const QuickAction = ({ title, description, icon: Icon, to }) => (
 );
 
 const AdminDashboardPage = () => {
-  const [deleteItem] = useDeleteItemMutation();
   const { data, isLoading, error, refetch } = useGetItemsQuery();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-
-
-  const handleDeleteItem = async (itemId) => {
-    try {
-        const res = await deleteItem(itemId).unwrap();
-        if (res.success) {
-            toast({
-                title: "Item Deleted Succesfully",
-            });
-        } else {
-            toast({
-                title: "Failed to Delete Item",
-                description: res.message,
-                variant: "destructive",
-            });
-        }
-    } catch (error) {
-        toast({
-            title: "Failed to Delete Item",
-            description: error?.data?.message || "An unexpected error occurred.",
-            variant: "destructive",
-        });
-    }
-}
 
   useEffect(() => {
     if (error) {
@@ -106,12 +67,6 @@ const AdminDashboardPage = () => {
   }, [error, toast]);
 
   const items = data?.items || [];
-
-  const filteredItems = items.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = filterStatus === "all" || item.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  });
 
   const stats = {
     totalItems: items.length,
@@ -177,60 +132,7 @@ const AdminDashboardPage = () => {
             to="/dashboard/settings"
           />
         </div>
-
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Items Management</CardTitle>
-            <CardDescription>
-              View and manage all lost and found items
-            </CardDescription>
-            <div className="flex flex-col sm:flex-row gap-4 mt-4">
-              <div className="flex-1">
-                <Input
-                  placeholder="Search items..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="max-w-sm"
-                />
-              </div>
-              <div className="flex gap-4">
-                <Select
-                  value={filterStatus}
-                  onValueChange={setFilterStatus}
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Items</SelectItem>
-                    <SelectItem value="lost">Lost Items</SelectItem>
-                    <SelectItem value="found">Found Items</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Link to="/report/item">
-                  <Button className="gap-2">
-                    <PlusCircle className="h-4 w-4" />
-                    Add Item
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex justify-center items-center h-64">
-                <Loader2 className="h-8 w-8 animate-spin" />
-              </div>
-            ) : (
-              <Items items={filteredItems} onDeleteItem={handleDeleteItem} refetch={refetch} />
-            )}
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <p className="text-sm text-muted-foreground">
-              Showing {filteredItems.length} of {items.length} items
-            </p>
-          </CardFooter>
-        </Card>
+        <ItemsListingPage />
       </div>
     </div>
   );

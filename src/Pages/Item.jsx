@@ -65,6 +65,76 @@ const ImageGallery = ({ images, currentIndex, onImageSelect, imageLoading, setIm
   </motion.div>
 );
 
+const DetailsCard = ({ item }) => {
+    const formatDate = (date) => new Date(date).toLocaleDateString();
+
+    return (
+        <Card>
+            <CardContent className="grid gap-6 p-6">
+                <div className="flex items-center gap-3">
+                    <User className="h-5 w-5 text-primary" />
+                    <div>
+                        <div className="text-sm text-gray-500">Reported by</div>
+                        <div className="font-medium">{item.reportedBy?.firstName} {item.reportedBy?.lastName}</div>
+                    </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                    <Calendar className="h-5 w-5 text-primary" />
+                    <div>
+                        <div className="text-sm text-gray-500">Date Reported</div>
+                        <div className="font-medium">{formatDate(item.dateReported)}</div>
+                    </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                    <Tag className="h-5 w-5 text-primary" />
+                    <div>
+                        <div className="text-sm text-gray-500">Category</div>
+                        <div className="font-medium">{item.category.name}</div>
+                    </div>
+                </div>
+
+                {item.returnedToOwner && (
+                    <>
+                        <div className="border-t pt-4">
+                            <h3 className="font-semibold text-lg mb-4">Return Details</h3>
+                            
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <User className="h-5 w-5 text-green-600" />
+                                    <div>
+                                        <div className="text-sm text-gray-500">Returned To</div>
+                                        <div className="font-medium">
+                                            {item.returnedTo?.firstName} {item.returnedTo?.lastName}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                    <Calendar className="h-5 w-5 text-green-600" />
+                                    <div>
+                                        <div className="text-sm text-gray-500">Return Date</div>
+                                        <div className="font-medium">{formatDate(item.returnedOn)}</div>
+                                    </div>
+                                </div>
+
+                                {item.returnNotes && (
+                                    <div className="bg-gray-50 p-3 rounded-lg">
+                                        <div className="text-sm text-gray-500 mb-1">Return Notes</div>
+                                        <div className="text-gray-700">{item.returnNotes}</div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
+            </CardContent>
+        </Card>
+    );
+};
+
+
 const ItemStatus = ({ status, returnedToOwner, returnedTo }) => (
     <div className="flex gap-2 items-center flex-wrap">
       <Badge variant={status === 'lost' ? 'destructive' : 'success'} className="text-sm font-medium">
@@ -184,7 +254,7 @@ const ItemPage = () => {
                             <ItemStatus status={item.status} returnedToOwner={item.returnedToOwner} returnedTo={item.returnedTo} />
                         </div>
 
-                        <Tabs defaultValue="description" className="w-full">
+                        <Tabs defaultValue="details" className="w-full">
                             <TabsList className="grid w-full grid-cols-3 mb-6">
                                 <TabsTrigger value="description">Description</TabsTrigger>
                                 <TabsTrigger value="details">Details</TabsTrigger>
@@ -222,31 +292,7 @@ const ItemPage = () => {
                             </TabsContent>
 
                             <TabsContent value="details">
-                                <Card>
-                                    <CardContent className="grid gap-6 p-6">
-                                        <div className="flex items-center gap-3">
-                                            <User className="h-5 w-5 text-primary" />
-                                            <div>
-                                                <div className="text-sm text-gray-500">Reported by</div>
-                                                <div className="font-medium">{item.reportedBy?.firstName} {item.reportedBy?.lastName}</div>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <Calendar className="h-5 w-5 text-primary" />
-                                            <div>
-                                                <div className="text-sm text-gray-500">Date Reported</div>
-                                                <div className="font-medium">{new Date(item.dateReported).toLocaleDateString()}</div>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <Tag className="h-5 w-5 text-primary" />
-                                            <div>
-                                                <div className="text-sm text-gray-500">Category</div>
-                                                <div className="font-medium">{item.category.name}</div>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
+                            <DetailsCard item={item} />
                             </TabsContent>
 
                             <TabsContent value="location" className="space-y-4">

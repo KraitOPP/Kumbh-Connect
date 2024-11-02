@@ -10,11 +10,11 @@ const itemsApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['Items']
         }),
-        updateItem: builder.mutation({
-            query: ({ _id, item }) => ({
-                url: `item/${_id}`,
+        updateItemStatus: builder.mutation({
+            query: ({ _id, returnedTo }) => ({
+                url: `item/status/${_id}`,
                 method: 'PUT',
-                body: item
+                body: {returnedTo}
             }),
             invalidatesTags: ['Items']
         }),
@@ -45,4 +45,4 @@ const itemsApiSlice = apiSlice.injectEndpoints({
     )
 })
 
-export const { useReportItemMutation, useUpdateItemMutation, useGetItemsQuery,useGetItemsByCategoryQuery, useGetUserItemQuery, useGetItemByIdQuery, useDeleteItemMutation } = itemsApiSlice;
+export const { useReportItemMutation, useUpdateItemStatusMutation, useGetItemsQuery,useGetItemsByCategoryQuery, useGetUserItemQuery, useGetItemByIdQuery, useDeleteItemMutation } = itemsApiSlice;
