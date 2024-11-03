@@ -126,10 +126,10 @@ const AdminDashboardPage = () => {
             to="/dashboard/users"
           />
           <QuickAction
-            title="System Settings"
-            description="Configure system preferences"
+            title="Manage Claims"
+            description="View and Manage claims by users"
             icon={LayoutDashboard}
-            to="/dashboard/settings"
+            to="/dashboard/claims"
           />
         </div>
         <ItemsListingPage />

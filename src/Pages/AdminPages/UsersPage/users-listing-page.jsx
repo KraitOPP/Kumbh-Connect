@@ -1,53 +1,54 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
 import UsersTable from './usersTable.jsx';
 import axios from 'axios';
+import { useSearchParams } from 'react-router-dom';
 
 export default function UsersListingPage() {
+  const [searchParams] = useSearchParams();
   const [users, setUsers] = useState([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const getQueryParams = () => {
-    const params = new URLSearchParams(window.location.search);
-    const page = parseInt(params.get('page') || '1', 10);
-    const search = params.get('q') || '';
-    const limit = parseInt(params.get('limit') || '10', 10);
+  const getQueryParams = useCallback(() => {
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const search = searchParams.get('q') || '';
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
     return { page, search, limit };
-  };
+  }, [searchParams]);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const { page, search, limit } = getQueryParams();
-      const filters = {
-        page,
-        limit,
-        ...(search && { search }),
-      };
-
-      try {
-        const { data } = await axios.get('http://localhost:8001/api/user/q', {
-          params: filters,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-          withCredentials: true,
-        });
-        
-        setTotalUsers(data.totalUsers);
-        setTotalPages(data.totalPages);
-        setUsers(data.users);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      } finally {
-        setLoading(false);
-      }
+  const fetchUsers = useCallback(async () => {
+    const { page, search, limit } = getQueryParams();
+    const filters = {
+      page,
+      limit,
+      ...(search && { search }),
     };
 
+    try {
+      const { data } = await axios.get('http://localhost:8001/api/user/q', {
+        params: filters,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        withCredentials: true,
+      });
+
+      setTotalUsers(data.totalUsers);
+      setTotalPages(data.totalPages);
+      setUsers(data.users);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [getQueryParams]);
+
+  useEffect(() => {
     fetchUsers();
-  }, [getQueryParams]); 
+  }, [searchParams, fetchUsers]);
 
   if (loading) {
     return <div>Loading...</div>;

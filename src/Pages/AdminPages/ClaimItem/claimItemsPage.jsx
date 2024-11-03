@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
 import ClaimsTable from './ClaimItemsTable';
@@ -6,19 +7,22 @@ import axios from 'axios';
 import { toast } from '@/components/ui/use-toast';
 
 export default function ClaimItemsListingPage() {
+    const [searchParams] = useSearchParams();
     const [claims, setClaims] = useState([]);
     const [totalClaims, setTotalClaims] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const getQueryParams = () => {
-        const params = new URLSearchParams(window.location.search);
-        const page = parseInt(params.get('page') || '1', 10);
-        const search = params.get('q') || '';
-        const limit = parseInt(params.get('limit') || '10', 10);
-        return { page, search, limit };
-    };
+    const getQueryParams = useCallback(() => {
+        const page = parseInt(searchParams.get('page') || '1', 10);
+        const search = searchParams.get('q') || '';
+        const status = searchParams.get('status') || '';
+        const limit = parseInt(searchParams.get('limit') || '10', 10);
+        return { page, search, status, limit };
+    }, [searchParams]);
 
     const fetchClaims = useCallback(async () => {
+        setIsLoading(true);
         try {
             const response = await axios.get('http://localhost:8001/api/claim', {
                 params: getQueryParams(),
@@ -27,7 +31,6 @@ export default function ClaimItemsListingPage() {
                 },
                 withCredentials: true,
             });
-
             if (response.data.success) {
                 const claimsWithRefresh = response.data.claims.map(claim => ({
                     ...claim,
@@ -38,30 +41,35 @@ export default function ClaimItemsListingPage() {
                 setTotalPages(response.data.totalPages);
             }
         } catch (error) {
-            console.log(error);
+            console.error('Failed to fetch claims:', error);
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: "Failed to fetch claims. Please try again."
             });
+        } finally {
+            setIsLoading(false);
         }
-    }, []);
+    }, [getQueryParams]);
 
     useEffect(() => {
         fetchClaims();
-    }, [getQueryParams]);
-
+    }, [searchParams, fetchClaims]);
 
     return (
         <div className="space-y-4 m-5">
             <div className="flex items-start justify-between">
                 <Heading
-                    title={`CLaims (${totalClaims})`}
+                    title={`Claims (${totalClaims})`}
                     description="Manage Claims"
                 />
             </div>
             <Separator />
-            <ClaimsTable data={claims} totalData={totalPages} />
+            <ClaimsTable 
+                data={claims} 
+                totalData={totalPages} 
+                isLoading={isLoading}
+            />
         </div>
     );
 }

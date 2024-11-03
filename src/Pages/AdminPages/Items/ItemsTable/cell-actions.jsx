@@ -99,7 +99,7 @@ export default function CellAction({ data, onUpdate }) {
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         onConfirm={() => {}}
-        loading={false}
+        loading={isUpdating}
       />
       
       <Dialog open={statusOpen} onOpenChange={setStatusOpen}>
@@ -186,7 +186,7 @@ export default function CellAction({ data, onUpdate }) {
         </DialogContent>
       </Dialog>
 
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
             <span className="sr-only">Open menu</span>

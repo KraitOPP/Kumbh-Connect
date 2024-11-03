@@ -7,6 +7,7 @@ import {
 export const searchParams = {
   page: parseAsInteger.withDefault(1),
   limit: parseAsInteger.withDefault(10),
+  status: parseAsString.withDefault(''),
   q: parseAsString,
 };
 

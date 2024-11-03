@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Edit, MoreHorizontal, Trash, CheckCircle, XCircle, Clock, Lock } from 'lucide-react';
+import { Edit, MoreHorizontal, Trash, CheckCircle, XCircle, Clock, Lock, Package, User, MapPin } from 'lucide-react';
 
 import { AlertModal } from '@/components/alert-modal';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { useUpdateClaimMutation } from '@/slices/claimItemSlice';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 export const CellAction = ({ data, onUpdate }) => {
   const [updateClaim, {isLoading}] = useUpdateClaimMutation();
@@ -103,6 +105,68 @@ export const CellAction = ({ data, onUpdate }) => {
             </DialogDescription>
           </DialogHeader>
           
+          <div className="space-y-6">
+            <Card className="border-dashed">
+              <CardContent className="pt-6">
+                <div className="flex items-center space-x-4 mb-4">
+                  <User className="h-8 w-8 text-muted-foreground" />
+                  <div>
+                    <h3 className="font-semibold text-lg">{data?.claimBy.firstName + ' ' + data?.claimBy.lastName}</h3>
+                    <p className="text-sm text-muted-foreground">User #{data?.claimBy._id}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Email</p>
+                    <p className="font-medium">{data?.claimBy?.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Phone Number</p>
+                    <p className="font-medium">{data?.claimBy?.phoneNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Registration Date</p>
+                    <p className="font-medium">{new Date(data?.claimBy.registeredAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+            <Separator />
+          
+            <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <p className="font-medium">Address Information</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-sm pl-6">
+                    <div>
+                      <p className="text-muted-foreground">Street Address</p>
+                      <p className="font-medium">{data?.claimBy?.address?.street || 'NA'}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">City</p>
+                      <p className="font-medium">{data?.claimBy?.address?.city || 'NA'}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">State/Province</p>
+                      <p className="font-medium">{data?.claimBy?.address?.state || 'NA'}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Postal Code</p>
+                      <p className="font-medium">{data?.claimBy?.address?.postalCode || 'NA'}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Country</p>
+                      <p className="font-medium">{data?.claimBy?.address?.country || 'NA'}</p>
+                    </div>
+                  </div>
+                </div>
+
+
           <div className="space-y-4 py-4">
             <Select
               value={selectedStatus}

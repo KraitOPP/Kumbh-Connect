@@ -1,10 +1,9 @@
-import {DataTable} from '@/components/ui/table/data-table';
-import {DataTableResetFilter} from '@/components/ui/table/data-table-reset-filter';
-import {DataTableSearch} from '@/components/ui/table/data-table-search';
+import { DataTable } from '@/components/ui/table/data-table';
+import { DataTableResetFilter } from '@/components/ui/table/data-table-reset-filter';
+import { DataTableSearch } from '@/components/ui/table/data-table-search';
 import { columns } from './columns';
-import { useItemsTableFilters } from './items-filter';
-;
-
+import { useItemsTableFilters, STATUS_OPTIONS } from './items-filter';
+import { DataTableFilterBox } from '@/components/ui/table/data-table-filter-box';
 
 export default function ItemsTable({
   data,
@@ -14,12 +13,14 @@ export default function ItemsTable({
     isAnyFilterActive,
     resetFilters,
     searchQuery,
+    setSearchQuery,
+    status,
+    setStatus,
     setPage,
-    setSearchQuery
   } = useItemsTableFilters();
 
   return (
-    <div className="space-y-4 ">
+    <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-4">
         <DataTableSearch
           searchKey="name"
@@ -27,13 +28,13 @@ export default function ItemsTable({
           setSearchQuery={setSearchQuery}
           setPage={setPage}
         />
-        {/* <DataTableFilterBox
-          filterKey="gender"
-          title="Gender"
-          options={GENDER_OPTIONS}
-          setFilterValue={setGenderFilter}
-          filterValue={genderFilter}
-        /> */}
+        <DataTableFilterBox
+          filterKey="status"
+          title="Status"
+          options={STATUS_OPTIONS}
+          setFilterValue={setStatus}
+          filterValue={status}
+        />
         <DataTableResetFilter
           isFilterActive={isAnyFilterActive}
           onReset={resetFilters}
