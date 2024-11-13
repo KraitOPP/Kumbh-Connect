@@ -75,7 +75,7 @@ export default function StoresPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const mapRef = useRef(null);
   const markersRef = useRef({});
-  
+
   useEffect(() => {
     if (data?.stores) {
       setStores(data.stores);
@@ -180,7 +180,7 @@ export default function StoresPage() {
                 <p className="text-gray-500">Find the nearest center location</p>
               </CardHeader>
               <CardContent>
-                <div id="map" className="h-[500px] rounded-xl overflow-hidden shadow-inner" />
+                <div id="map" className="h-[600px] rounded-xl overflow-hidden shadow-inner" />
               </CardContent>
             </Card>
           </div>
@@ -200,15 +200,15 @@ export default function StoresPage() {
                     className="pl-10"
                   />
                 </div>
-                <ScrollArea className="h-[600px] pr-4">
+                <ScrollArea className="h-[575px] pr-4">
                   {isLoading ? (
                     <div className="flex justify-center items-center h-40">
                       <Loader className="h-8 w-8 animate-spin text-primary" />
                     </div>
                   ) : error ? (
-                    <div className="text-center text-red-500 p-4">
-                      Unable to load centers
-                    </div>
+                    <div className="text-center text-red-500 p-4">Unable to load centers</div>
+                  ) : filteredStores.length === 0 ? (
+                    <div className="text-center text-gray-500 p-4">No centers found</div>
                   ) : (
                     <div className="space-y-4">
                       <AnimatePresence>

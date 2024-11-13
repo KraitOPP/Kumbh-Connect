@@ -10,7 +10,8 @@ import {
   UserSearch,
   UserCheck,
   Clock,
-  Calendar
+  Calendar,
+  Store
 } from "lucide-react";
 import { useGetItemsQuery } from "@/slices/itemSlice";
 import { toast } from "@/components/ui/use-toast";
@@ -211,10 +212,10 @@ const AdminDashboardPage = () => {
             to="/dashboard/category/add-new"
           />
           <QuickAction
-            title="User Management"
-            description="View and manage user accounts"
-            icon={Users}
-            to="/dashboard/users"
+            title="Center Management"
+            description="Add new Center"
+            icon={Store}
+            to="/dashboard/store/add-new"
           />
           <QuickAction
             title="Claims Management"

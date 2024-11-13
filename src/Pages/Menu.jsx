@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { AlertCircle, Archive, Package, Users } from "lucide-react";
+import { AlertCircle, Archive, ChartBarStacked, Package, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { useGetItemsQuery } from "@/slices/itemSlice";
 import { useGetPersonsQuery } from "@/slices/personSlice";
@@ -96,20 +96,27 @@ export default function MenuPage() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {categories.map((category) => (
-                <motion.div
-                  key={category._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Link to={`/category/${category._id}`}>
-                    <CategoryCard category={category} />
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
+            <>
+              {categories.length>0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {categories.map((category) => (
+                  <motion.div
+                    key={category._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Link to={`/category/${category._id}`}>
+                      <CategoryCard category={category} />
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+              )}
+               {items.length === 0 && persons.length === 0 && (
+                    <NoContentCard type="Categories" icon={ChartBarStacked} />
+              )}
+            </>
           )}
         </section>
 
