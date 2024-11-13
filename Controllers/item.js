@@ -2,6 +2,7 @@ const User = require("../Models/user");
 const Item = require("../Models/item");
 const { z } = require("zod");
 const mongoose = require("mongoose");
+const { sendItemReturnEmail } = require("../Utils/itemReturnedMail");
 
 const itemSchemaValidate = z.object({
     name: z
@@ -57,7 +58,7 @@ const handleAddItem = async(req,res)=>{
         const {name, description, category, images,location, status} = req.body;
         const reportedBy = req.user._id.toString();
         const validate = itemSchemaValidate.safeParse({name, description, category, images, status, reportedBy});
-        const user = await User.findById(reportedBy);
+        const user = req.user;
         if(!user){
             return res.status(401).json({
                 success: false,
@@ -191,11 +192,8 @@ const handleUpdateItemStatus = async (req, res) => {
             returnedToOwner: true
         };
         
-        const item = await Item.findByIdAndUpdate(itemId, { $set: updateFields }, { new: true });
-        
-        if (originalItem.status === 'lost') {
-            await sendReturnMail(item);
-        }
+        const item = await Item.findByIdAndUpdate(itemId, { $set: updateFields }, { new: true }).populate('reportedBy returnedTo');
+        await sendItemReturnEmail(item.returnedTo.email ,item);
         
         return res.status(200).json({
             success: true,
@@ -544,7 +542,14 @@ const handleGetItemofUser = async (req,res)=>{
 
 const handleGetItemById = async (req,res)=>{
     try {
-        const itemId = req.params.id;
+        const itemId = mongooseIdVerify.safeParse(req.params.id).success ? req.params.id : null;
+        if (!itemId) {
+            return res.status(404).json({
+                success: false,
+                message: "Invalid Item Id.",
+                item: null,
+            });
+        }
         const item = await Item.findById(itemId).populate("category reportedBy returnedTo");
 
         if (!item) {
@@ -572,8 +577,7 @@ const handleGetItemById = async (req,res)=>{
 
 const handleGetItemByQuery = async (req, res) => {
     try {
-        const { search, page = 1, limit = 10 } = req.query;
-
+        const { search, status, page = 1, limit = 10 } = req.query;
         const pageNumber = parseInt(page);
         const pageSize = parseInt(limit);
         const skip = (pageNumber - 1) * pageSize;
@@ -603,20 +607,37 @@ const handleGetItemByQuery = async (req, res) => {
             }
         ];
 
+        const matchConditions = [];
+
         if (search) {
             const searchRegex = new RegExp(search, 'i');
+            matchConditions.push({
+                $or: [
+                    { 'name': searchRegex },
+                    { 'description': searchRegex },
+                    { 'status': searchRegex },
+                    { 'category.name': searchRegex },
+                    { 'reportedBy.firstName': searchRegex },
+                    { 'reportedBy.phoneNumber': searchRegex },
+                    { 'reportedBy.email': searchRegex },
+                ]
+            });
+        }
+
+        if (status) {
+            const statusArray = status.toLowerCase().split('.');
+            matchConditions.push({ 
+                'status': statusArray.length > 1 
+                    ? { $in: statusArray }
+                    : statusArray[0]
+            });
+        }
+
+        if (matchConditions.length > 0) {
             pipeline.push({
-                $match: {
-                    $or: [
-                        { 'name': searchRegex },
-                        { 'description': searchRegex },
-                        { 'status': searchRegex },
-                        { 'category.name': searchRegex },
-                        { 'reportedBy.firstName': searchRegex },
-                        { 'reportedBy.phoneNumber': searchRegex },
-                        { 'reportedBy.email': searchRegex },
-                    ]
-                }
+                $match: matchConditions.length === 1 
+                    ? matchConditions[0] 
+                    : { $and: matchConditions }
             });
         }
 
@@ -631,44 +652,64 @@ const handleGetItemByQuery = async (req, res) => {
             { $limit: pageSize }
         );
 
-        const items = await Item.aggregate(pipeline);
+        pipeline.push({
+            $project: {
+                _id: 1,
+                name: 1,
+                description: 1,
+                status: 1,
+                images: 1,
+                location: 1,
+                dateReported: 1,
+                dateFound: 1,
+                dateReturned: 1,
+                category: {
+                    _id: 1,
+                    name: 1
+                },
+                reportedBy: {
+                    _id: 1,
+                    firstName: 1,
+                    lastName: 1,
+                    email: 1,
+                    phoneNumber: 1
+                }
+            }
+        });
 
-        const totalItemsArray = await Item.aggregate([
-            ...countPipeline,
-            { $count: 'total' }
+        const [items, totalItemsArray] = await Promise.all([
+            Item.aggregate(pipeline),
+            Item.aggregate([
+                ...countPipeline,
+                { $count: 'total' }
+            ])
         ]);
-        
-        const totalItems = totalItemsArray.length > 0 ? totalItemsArray[0].total : 0;
 
-        if (!items || items.length === 0) {
-            return res.status(200).json({
-                success: true,
-                message: "No Items Found",
-                items: [],
-                totalItems: 0,
-                currentPage: pageNumber,
-                totalPages: 0
-            });
-        }
+        const totalItems = totalItemsArray.length > 0 ? totalItemsArray[0].total : 0;
+        const totalPages = Math.ceil(totalItems / pageSize);
 
         return res.status(200).json({
             success: true,
-            message: "Items Fetched Successfully",
+            message: items.length ? "Items Fetched Successfully" : "No Items Found",
             items,
             totalItems,
             currentPage: pageNumber,
-            totalPages: Math.ceil(totalItems / pageSize)
+            totalPages,
+            filters: {
+                search,
+                status,
+                limit: pageSize
+            }
         });
 
     } catch (error) {
-        console.error("Error Getting Items", error);
+        console.error("Error Getting Items:", error);
         return res.status(500).json({
             success: false,
-            message: "Internal Server Issue, Please try again!",
+            message: "Internal Server Error. Please try again!",
             error: error.message
         });
     }
 };
-
 
 module.exports = {handleAddItem,handleUpdateItem, handleDeleteItem, handleUpdateItemStatus, handleGetItems, handleGetItemsByCategory, handleGetItemsOfACategory, handleGetItemofUser, handleGetItemById, handleGetItemByQuery};

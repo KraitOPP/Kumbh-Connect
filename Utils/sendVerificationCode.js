@@ -7,9 +7,9 @@ const transporter = nodemailer.createTransport({
     port: 587,
     secure: false,
     auth: {
-        user: process.env.USER,
-        pass: process.env.APP_PASS,
-    },
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
     connectionTimeout: 10000,
 });
 
@@ -99,8 +99,8 @@ const sendResetPasswordMail = async (userEmail, code) => {
     try {
         const mailOptions = {
             from:{
-                name:"Mahakumbh Lost and Found",
-                address:process.env.USER,
+                name:"Kumbh Connect",
+                address:process.env.EMAIL_USER,
             }, 
             to: userEmail, 
             subject: "Password Reset Code",

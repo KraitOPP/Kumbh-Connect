@@ -6,6 +6,11 @@ const personSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  description: {
+    type: String,
+    required: true,
+    trim: true,
+  },
   age: {
     type: Number,
     required: true,
@@ -13,17 +18,14 @@ const personSchema = new mongoose.Schema({
   guardian: {
     name:{
         type: String,
-        required: true,
         trim: true,
     },
     phoneNumber:{
         type:String,
-        required:true,
         trim:true,
     },
     relation:{
         type:String,
-        required:true,
         trim:true,
     },
     address: {
@@ -39,15 +41,16 @@ const personSchema = new mongoose.Schema({
           type: String,
           trim: true,
         },
-        country: {
-          type: String,
-          trim: true,
-        },
         postalCode: {
           type: String,
           trim: true,
         },
       },
+  },
+  centre:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"Store",
+    required:false,
   },
   images: [{
     url:{
@@ -65,10 +68,6 @@ const personSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
-  foundBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  },
   location: {
     latitude: {
       type: Number,
@@ -78,22 +77,18 @@ const personSchema = new mongoose.Schema({
       type: Number,
       required: true,
     },
-    address: {
-      type: String,
-      trim: true,
-    },
   },
   dateReported: {
     type: Date,
     default: Date.now,
   },
-  dateFound: {
-    type: Date,
-  },
-  returnedToOwner: {
+  returnedToGuardian: {
     type: Boolean,
     default: false,
   },
+  returnedOn: {
+    type: Date,
+  }
 });
 
 module.exports = mongoose.model('Person', personSchema);

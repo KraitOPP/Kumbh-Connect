@@ -1,5 +1,5 @@
 const express = require('express');
-const dotenv = require("dotenv");
+const dotenv = require("dotenv").config();
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const { connectMongoDB } = require('./connection');
@@ -10,8 +10,8 @@ const categoryRouter = require('./Routes/category');
 const ItemRouter = require('./Routes/item');
 const userRouter = require('./Routes/user');
 const claimItemRouter = require('./Routes/claimItem');
-
-dotenv.config();
+const storeRouter = require('./Routes/store');
+const personRouter = require('./Routes/person');
 
 app.use(cors({
     origin: true,
@@ -39,6 +39,8 @@ app.use("/api/user/",userRouter);
 app.use("/api/category/",categoryRouter);
 app.use("/api/item/",ItemRouter);
 app.use("/api/claim/",claimItemRouter);
+app.use("/api/store/",storeRouter);
+app.use("/api/person/",personRouter);
 
 app.get('/',(req,res)=>{
     return res.send("Server is  Running");

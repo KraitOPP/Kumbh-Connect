@@ -2,14 +2,13 @@ const nodemailer = require('nodemailer');
 const { htmlToText } = require('nodemailer-html-to-text');
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
     host: "smtp.gmail.com",
     port: 587,
     secure: false,
     auth: {
-        user: process.env.USER,
-        pass: process.env.APP_PASS,
-    },
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
     connectionTimeout: 10000,
 });
 
@@ -92,7 +91,7 @@ const createClaimVerificationEmailTemplate = (itemDetails) => {
 
                 <p>You can Collect Your item from our collection points mentioned on our website.</p>
                 
-                <a href="http://localhost:5173/items" class="button">View My Items</a>
+                <a href="http://localhost:5173/profile" class="button">View My Reports</a>
             </div>
 
             <div class="footer">
@@ -109,8 +108,8 @@ const sendClaimVerificationEmail = async (userEmail, itemDetails) => {
     try {
         const mailOptions = {
             from:{
-                name:"Mahakumbh Lost and Found",
-                address:process.env.USER,
+                name:"Kumbh Connect",
+                address:process.env.EMAIL_USER,
             }, 
             to: userEmail,
             subject: 'Item Claim Verification - Your Claim Request Has Been Verified',

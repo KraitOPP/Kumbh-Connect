@@ -192,9 +192,9 @@ const handleGetAClaim = async (req, res) => {
     }
   };
 
-const handleGetClaims = async (req, res) => {
+  const handleGetClaims = async (req, res) => {
     try {
-        const { search, page = 1, limit = 10 } = req.query;
+        const { search, page = 1, limit = 10, status } = req.query;
 
         const pageNumber = parseInt(page);
         const pageSize = parseInt(limit);
@@ -224,6 +224,17 @@ const handleGetClaims = async (req, res) => {
                 $unwind: "$item"
             }
         ];
+
+        if (status) {
+            const statusArray = status.split('.').map(s => s.trim().toLowerCase());
+            pipeline.push({
+                $match: {
+                    status: { 
+                        $in: statusArray
+                    }
+                }
+            });
+        }
 
         if (search) {
             const searchRegex = new RegExp(search, 'i');
