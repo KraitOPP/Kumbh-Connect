@@ -157,9 +157,10 @@ const handleGetCategories = async (req,res)=>{
         const categories = await Category.find({}).sort({createdAt:-1});
 
         if (!categories || categories.length === 0) {
-            return res.status(404).json({
-                success: false,
+            return res.status(200).json({
+                success: true,
                 message: "No Categories found.",
+                categories: [],
             });
         }
 

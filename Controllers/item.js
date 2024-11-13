@@ -395,8 +395,8 @@ const handleGetItemsOfACategory = async(req,res)=>{
         const id = req.params.id;
         const _id = mongooseIdVerify.safeParse(id).success ? id : null;
         if(!_id){
-            return res.status(404).json({
-                success:false,
+            return res.status(400).json({
+                success:true,
                 message: "Category not Found!",
             });
         }
