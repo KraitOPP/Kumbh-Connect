@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import UsersTable from './usersTable.jsx';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
+const SERVER_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function UsersListingPage() {
   const [searchParams] = useSearchParams();
@@ -28,7 +29,7 @@ export default function UsersListingPage() {
     };
 
     try {
-      const { data } = await axios.get('http://localhost:8001/api/user/q', {
+      const { data } = await axios.get(`${SERVER_URL}/api/user/q`, {
         params: filters,
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+const SERVER_URL = import.meta.env.VITE_BACKEND_URL;
 
 const ClaimPage = () => {
     const { id } = useParams();
@@ -17,7 +18,7 @@ const ClaimPage = () => {
     useEffect(() => {
         const fetchClaimDetails = async () => {
             try {
-                const response = await axios.get(`http://localhost:8001/api/claim/${id}`, {
+                const response = await axios.get(`${SERVER_URL}/api/claim/${id}`, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('token')}`,
                     },
@@ -62,7 +63,7 @@ const ClaimPage = () => {
         setUpdatingStatus(true);
         try {
             const response = await axios.put(
-                `http://localhost:8001/api/claim/verify`,
+                `${SERVER_URL}/api/claim/verify`,
                 { status: newStatus, claimId: id },
                 {
                     headers: {

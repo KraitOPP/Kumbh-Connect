@@ -6,7 +6,6 @@ import { Provider } from 'react-redux'
 import store from './app/store.js'
 import './index.css'
 import 'leaflet/dist/leaflet.css';
-
 import { NuqsAdapter } from 'nuqs/adapters/react-router'
 
 

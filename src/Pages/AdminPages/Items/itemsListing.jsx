@@ -6,6 +6,7 @@ import axios from 'axios';
 import { toast } from '@/components/ui/use-toast';
 import { useSearchParams } from 'react-router-dom';
 import { useDeleteItemMutation } from '@/slices/itemSlice';
+const SERVER_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function ItemsListingPage() {
     const [searchParams] = useSearchParams();
@@ -50,7 +51,7 @@ export default function ItemsListingPage() {
     const fetchItems = useCallback(async () => {
         setIsLoading(true);
         try {
-            const response = await axios.get('http://localhost:8001/api/item/q/', {
+            const response = await axios.get(`${SERVER_URL}/api/item/q/`, {
                 params: getQueryParams(),
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,

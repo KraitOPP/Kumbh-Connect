@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, ArrowRight, Tag } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -56,14 +57,14 @@ const ItemCard = ({ item }) => {
         </div>
 
         <div className="pt-6">
-          <Button 
-            className="w-full group/button" 
-            variant="outline"
-            onClick={() => window.location.href = `/item/${item._id}`}
-          >
+          <Link to={`/item/${item._id}`}>
+          <Button  className="w-full group/button" 
+            variant="outline">
+           
             <span className="mr-2">View Details</span>
             <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover/button:translate-x-1" />
           </Button>
+          </Link>
         </div>
       </CardContent>
     </Card>

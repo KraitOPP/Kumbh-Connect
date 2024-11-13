@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import ClaimsTable from './ClaimItemsTable';
 import axios from 'axios';
 import { toast } from '@/components/ui/use-toast';
+const SERVER_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function ClaimItemsListingPage() {
     const [searchParams] = useSearchParams();
@@ -24,7 +25,7 @@ export default function ClaimItemsListingPage() {
     const fetchClaims = useCallback(async () => {
         setIsLoading(true);
         try {
-            const response = await axios.get('http://localhost:8001/api/claim', {
+            const response = await axios.get(`${SERVER_URL}/api/claim`, {
                 params: getQueryParams(),
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,

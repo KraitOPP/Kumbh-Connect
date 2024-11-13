@@ -6,6 +6,7 @@ import axios from 'axios';
 import { toast } from '@/components/ui/use-toast';
 import { useSearchParams } from 'react-router-dom';
 import { useDeletePersonMutation } from '@/slices/personSlice';
+const SERVER_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function PeopleListingPage() {
     const [searchParams] = useSearchParams();
@@ -48,7 +49,7 @@ export default function PeopleListingPage() {
 
     const fetchPeople = useCallback(async () => {
         try {
-            const response = await axios.get('http://localhost:8001/api/person/q/', {
+            const response = await axios.get(`${SERVER_URL}/api/person/q/`, {
                 params: getQueryParams(),
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
