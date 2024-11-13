@@ -40,7 +40,6 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { toast } from './ui/use-toast';
 
 const ItemsTable = ({ items, onDeleteItem }) => {
     const [filters, setFilters] = useState({

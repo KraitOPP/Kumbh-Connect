@@ -3,7 +3,6 @@ import { selectUser } from "@/slices/authSlice";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import icon from "../assets/icon.png";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/components/ui/use-toast";
@@ -17,7 +16,7 @@ export default function AppLayout() {
   const [openMenus, setOpenMenus] = useState({});
 
   useEffect(() => {
-    if (!userInfo && path !== "/") {
+    if (!userInfo && path !== "/" && path!=="/menu") {
       navigate("/accounts/sign-in", { replace: true });
     }
 
@@ -39,9 +38,9 @@ export default function AppLayout() {
       <div className="hidden border-r bg-muted/40 md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-            <Link to="/" className="flex items-center gap-2 font-semibold">
-              <span className="w-32">
-                <img className="h-full w-full" src={icon} alt="" />
+            <Link to="/menu" className="flex items-center gap-2 font-semibold">
+            <span className='text-2xl font-bold text-gray-500'>
+                कुम्भ Connect
               </span>
             </Link>
           </div>

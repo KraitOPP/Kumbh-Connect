@@ -1,4 +1,5 @@
 import {
+  Box,
     ChevronDown,
     ChevronRight,
     Home,
@@ -118,6 +119,8 @@ import {
         return <User2 className="h-4 w-4" />;
       case "userPen":
         return <UserPen className="h-4 w-4" />;
+      case "store":
+        return <Box className="h-4 w-4" />;
       default:
         return <UserIcon className="h-4 w-4" />;
     }

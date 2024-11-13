@@ -49,7 +49,7 @@ export const LoginPage = () => {
                 toast({
                     title: "Login Successful",
                 });
-                navigate('/',{replace:true})
+                navigate('/menu',{replace:true})
             } else {
                 toast({
                     title: "Login Failed",

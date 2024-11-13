@@ -24,7 +24,6 @@ import { toast } from "@/components/ui/use-toast";
 import { logout, selectUser } from "@/slices/authSlice";
 import { useGetItemsQuery } from "@/slices/itemSlice";
 import Navigation from "./navigation";
-import icon from '@/assets/icon.png';
 
 const Navbar = () => {
   const dispatch = useDispatch();
@@ -96,13 +95,15 @@ const Navbar = () => {
           <SheetHeader className="border-b p-4">
             <SheetTitle asChild>
               <Link
-                to="/"
+                to="/menu"
                 onClick={() => setIsSidebarOpen(false)}
                 className="flex items-center gap-2"
               >
-                <span className="w-32">
-                  <img className="h-full w-full" src={icon} alt="Logo" />
-                </span>
+                <div className="flex items-center space-x-4">
+              <span className='text-2xl font-bold text-gray-500'>
+                कुम्भ Connect
+              </span>
+            </div>
               </Link>
             </SheetTitle>
           </SheetHeader>

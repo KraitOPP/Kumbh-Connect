@@ -33,12 +33,13 @@ import { useGetUsersQuery } from '@/slices/userApiSlice';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
-export default function CellAction({ data, onUpdate }) {
+export default function CellAction({ data, onUpdate, onDelete }) {
   const { data: usersRes, isLoading: isFetchingUsers, error: errorInFetchingUsers } = useGetUsersQuery();
   const users = usersRes?.users || [];
   const [updateItemStatus, { isLoading: isUpdating }] = useUpdateItemStatusMutation();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedUser, setSelectedUser] = useState(data.returnedTo || '');
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -91,6 +92,23 @@ export default function CellAction({ data, onUpdate }) {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      await onDelete(data._id);
+      setDeleteOpen(false);
+    } catch (error) {
+      console.log(error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete the item. Please try again.",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const canUpdateStatus = data.status !== 'returned';
 
   return (
@@ -98,8 +116,8 @@ export default function CellAction({ data, onUpdate }) {
       <AlertModal
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
-        onConfirm={() => {}}
-        loading={isUpdating}
+        onConfirm={handleDelete}
+        loading={isDeleting}
       />
       
       <Dialog open={statusOpen} onOpenChange={setStatusOpen}>

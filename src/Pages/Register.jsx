@@ -31,15 +31,6 @@ const registerFormSchema = z.object({
         .min(8, { message: "Password must be atleast 8 length" })
 });
 
-const IllustrationSVG = () => (
-  <svg className="w-64 h-64" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="200" cy="200" r="150" stroke="black" strokeWidth="2" fill="white"/>
-    <path d="M200 120 C160 120 130 150 130 190 C130 230 160 260 200 260 C240 260 270 230 270 190 C270 150 240 120 200 120" stroke="black" strokeWidth="2" fill="white"/>
-    <circle cx="200" cy="160" r="30" stroke="black" strokeWidth="2" fill="white"/>
-    <path d="M150 320 C150 280 250 280 250 320" stroke="black" strokeWidth="2" fill="transparent"/>
-  </svg>
-);
-
 export const RegisterPage = () => {
     const navigate = useNavigate();
     const [register, {isLoading}] = useRegisterMutation();

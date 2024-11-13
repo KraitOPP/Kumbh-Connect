@@ -225,11 +225,11 @@ const ItemPage = () => {
         <PhotoProvider>
             <div className="container mx-auto px-4 py-8">
                 <Link 
-                    to="/"
+                    to="/menu"
                     className="inline-flex items-center gap-2 text-gray-600 hover:text-primary mb-6 transition-colors"
                 >
                     <ArrowLeft className="h-4 w-4" />
-                    Back to Items
+                    Back to Home
                 </Link>
                 
                 <div className="grid lg:grid-cols-2 gap-12">

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { 
   LayoutDashboard, 
@@ -6,9 +6,13 @@ import {
   Tags,
   Users,
   AlertCircle,
-  ArrowUpRight
+  ArrowUpRight,
+  UserSearch,
+  UserCheck,
+  Clock,
+  Calendar
 } from "lucide-react";
-import {  useGetItemsQuery } from "@/slices/itemSlice";
+import { useGetItemsQuery } from "@/slices/itemSlice";
 import { toast } from "@/components/ui/use-toast";
 import {
   Card,
@@ -17,22 +21,41 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import ItemsListingPage from "./Items/itemsListing";
+import { useGetPersonsQuery } from "@/slices/personSlice";
 
-const StatsCard = ({ title, value, icon: Icon, trend }) => (
-  <Card>
+const StatsCard = ({ title, value, secondaryValue, icon: Icon, trend, description }) => (
+  <Card className="hover:bg-accent/5 transition-colors">
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
       <CardTitle className="text-sm font-medium">
         {title}
       </CardTitle>
-      <Icon className="h-4 w-4 text-muted-foreground" />
+      <Icon className="h-4 w-4 text-primary" />
     </CardHeader>
     <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
-      {trend && (
-        <p className="text-xs text-muted-foreground">
-          {trend > 0 ? '+' : ''}{trend}% from last month
+      <div className="flex items-baseline space-x-2">
+        <div className="text-2xl font-bold">{value}</div>
+        {secondaryValue && (
+          <div className="text-sm text-muted-foreground">
+            {secondaryValue}
+          </div>
+        )}
+      </div>
+      {description && (
+        <p className="text-xs text-muted-foreground mt-1">
+          {description}
         </p>
+      )}
+      {trend && (
+        <div className={`text-xs mt-2 ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
+          {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}% from last month
+        </div>
       )}
     </CardContent>
   </Card>
@@ -54,25 +77,41 @@ const QuickAction = ({ title, description, icon: Icon, to }) => (
 );
 
 const AdminDashboardPage = () => {
-  const { data, isLoading, error, refetch } = useGetItemsQuery();
+  const { data: itemsData, isLoading: itemsLoading, error: itemsError } = useGetItemsQuery();
+  const { data: peopleData, isLoading: peopleLoading, error: peopleError } = useGetPersonsQuery();
 
-  useEffect(() => {
-    if (error) {
+  React.useEffect(() => {
+    if (itemsError || peopleError) {
       toast({
-        title: "Failed to Load Items",
-        description: error?.data?.message || "An unexpected error occurred.",
+        title: "Failed to Load Data",
+        description: (itemsError || peopleError)?.data?.message || "An unexpected error occurred.",
         variant: "destructive",
       });
     }
-  }, [error, toast]);
+  }, [itemsError, peopleError]);
 
-  const items = data?.items || [];
+  const items = itemsData?.items || [];
+  const people = peopleData?.persons || [];
 
   const stats = {
-    totalItems: items.length,
-    lostItems: items.filter(item => item.status === "lost").length,
-    foundItems: items.filter(item => item.status === "found").length,
-    returnedItems: items.filter(item => item.returnedToOwner).length,
+    items: {
+      total: items.length,
+      lost: items.filter(item => item.status === "lost").length,
+      found: items.filter(item => item.status === "found").length,
+      returned: items.filter(item => item.returnedToOwner).length,
+    },
+    people: {
+      total: people.length,
+      missing: people.filter(person => person.status === "lost").length,
+      found: people.filter(person => person.status === "found").length,
+      resolved: people.filter(person => person.returnedToGuardian).length,
+      recent: people.filter(person => {
+        const reportDate = new Date(person.dateReported);
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        return reportDate >= thirtyDaysAgo;
+      }).length,
+    }
   };
 
   return (
@@ -81,57 +120,116 @@ const AdminDashboardPage = () => {
         <div className="flex flex-col space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
           <p className="text-muted-foreground">
-            Manage and monitor your lost and found items
+            Comprehensive overview of items and people reports
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StatsCard 
-            title="Total Items" 
-            value={stats.totalItems} 
-            icon={Package}
-            trend={12}
-          />
-          <StatsCard 
-            title="Lost Items" 
-            value={stats.lostItems} 
-            icon={AlertCircle}
-            trend={-8}
-          />
-          <StatsCard 
-            title="Found Items" 
-            value={stats.foundItems} 
-            icon={Package}
-            trend={24}
-          />
-          <StatsCard 
-            title="Returned Items" 
-            value={stats.returnedItems} 
-            icon={Users}
-            trend={18}
-          />
-        </div>
+        <Tabs defaultValue="items" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="items">Items Overview</TabsTrigger>
+            <TabsTrigger value="people">People Overview</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="items" className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <StatsCard 
+                title="Total Items" 
+                value={stats.items.total} 
+                icon={Package}
+                trend={12}
+              />
+              <StatsCard 
+                title="Lost Items" 
+                value={stats.items.lost} 
+                icon={AlertCircle}
+                trend={-8}
+              />
+              <StatsCard 
+                title="Found Items" 
+                value={stats.items.found} 
+                icon={Package}
+                trend={24}
+              />
+              <StatsCard 
+                title="Returned Items" 
+                value={stats.items.returned} 
+                icon={Users}
+                trend={18}
+              />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="people" className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <StatsCard 
+                title="Missing People" 
+                value={stats.people.missing}
+                secondaryValue="Active Cases"
+                icon={UserSearch}
+                trend={-5}
+              />
+              <StatsCard 
+                title="Found People" 
+                value={stats.people.found}
+                description="Successfully located individuals"
+                icon={UserCheck}
+                trend={15}
+              />
+              <StatsCard 
+                title="Recent Reports" 
+                value={stats.people.recent}
+                description="Last 30 days"
+                icon={Clock}
+              />
+              <StatsCard 
+                title="Total Cases" 
+                value={stats.people.total}
+                secondaryValue={`${stats.people.resolved} resolved`}
+                icon={Calendar}
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <QuickAction
-            title="Add Category"
-            description="Create new item categories"
+            title="Report Missing Person"
+            description="File a new missing person report"
+            icon={UserSearch}
+            to="/report/person"
+          />
+          <QuickAction
+            title="Report Found Person"
+            description="Report a found individual"
+            icon={UserCheck}
+            to="/dashboard/report/found-person"
+          />
+          <QuickAction
+            title="Manage Categories"
+            description="Create and manage item categories"
             icon={Tags}
             to="/dashboard/category/add-new"
           />
           <QuickAction
-            title="Manage Users"
+            title="User Management"
             description="View and manage user accounts"
             icon={Users}
             to="/dashboard/users"
           />
           <QuickAction
-            title="Manage Claims"
-            description="View and Manage claims by users"
+            title="Claims Management"
+            description="Review and process item claims"
             icon={LayoutDashboard}
             to="/dashboard/claims"
           />
+          <QuickAction
+            title="Case Management"
+            description="Manage missing person cases"
+            icon={LayoutDashboard}
+            to="/dashboard/people"
+          />
         </div>
+
         <ItemsListingPage />
       </div>
     </div>

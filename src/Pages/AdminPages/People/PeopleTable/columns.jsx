@@ -1,4 +1,3 @@
-import { RewindIcon } from "lucide-react";
 import CellAction  from "./cell-actions";
 
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +18,7 @@ export const columns = [
     },
     {
       accessorKey: 'name',
-      header: 'Item'
+      header: 'Person'
     },
     {
       accessorKey: 'status',
@@ -47,8 +46,8 @@ export const columns = [
       )
     },
     {
-      accessorKey: 'category.name',
-      header: 'Category',
+      accessorKey: 'age',
+      header: 'Age',
     },
     {
       accessorKey: 'dateReported',
@@ -59,7 +58,7 @@ export const columns = [
     },
     {
       id: 'actions',
-      cell: ({ row }) => <CellAction data={row.original} onUpdate={row.original.refreshData} onDelete={row.original.deleteItem} />
+      cell: ({ row }) => <CellAction data={row.original} onUpdate={row.original.refreshData} onDelete={row.original.deletePerson} />
     }
   ];
   

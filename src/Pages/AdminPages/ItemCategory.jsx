@@ -26,7 +26,7 @@ const categorySchema = z.object({
 })
 
 
-export const AddItemCategoryPage = () => {
+export default function AddItemCategoryPage() {
 
     const navigate = useNavigate();
     const [addItemCategory, {isLoading}] = useAddItemCategoryMutation();

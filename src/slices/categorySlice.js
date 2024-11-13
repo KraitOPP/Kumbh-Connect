@@ -7,7 +7,8 @@ const categoryApiSlice = apiSlice.injectEndpoints({
                 url:'/category/',
                 method:'POST',
                 body:data,
-            })
+            }),
+            invalidatesTags: ['Categories']
         }),
         getItemCategory: builder.query({
             query: () => 'category',

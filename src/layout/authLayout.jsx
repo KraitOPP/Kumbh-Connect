@@ -15,7 +15,7 @@ export default function AuthLayout(){
             toast({
                 title: "Already Signed In"
             });
-            navigate('/', { replace: true });
+            navigate('/menu', { replace: true });
         }
     }, []);
 

@@ -3,9 +3,8 @@ import { useEffect, useState } from "react";
 import { useGetItemsByCategoryQuery } from "@/slices/itemSlice";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { Link, useParams } from "react-router-dom";
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useParams } from "react-router-dom";
+import { HeroSection } from "@/components/HeroSection";
 
 
 export default function CategoryItems() {
@@ -40,20 +39,7 @@ export default function CategoryItems() {
 
   return (
     <div className="m-5 flex justify-center items-center flex-col gap-5">
-      <Card className="sm:col-span-2 w-full" x-chunk="dashboard-05-chunk-0">
-        <CardHeader className="pb-3">
-          <CardTitle>Report Lost/Found Item</CardTitle>
-          <CardDescription className="max-w-lg text-balance leading-relaxed">
-            Lost Something, Report Here.
-            Found Something Help by Reporting here.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Link to={"/report/item"}>
-            <Button>Report</Button>
-          </Link>
-        </CardFooter>
-      </Card>
+      <HeroSection key={1} />
       {category ? (
         <>
           <h2 className="text-2xl w-full text-start">

@@ -1,7 +1,7 @@
 export const navItems = [
     {
       title: 'Home',
-      url: '/',
+      url: '/menu',
       icon: 'home',
       isActive: false,
       authRequired: false,
@@ -35,6 +35,13 @@ export const navItems = [
       ]
     },
     {
+      title: 'Our Centres',
+      url: '/centres',
+      icon: 'store',
+      isActive: false,
+      authRequired: false,
+    },
+    {
       title: 'Dashboard',
       url: '#',
       icon: 'dashboard',
@@ -48,12 +55,17 @@ export const navItems = [
           isActive: false,
         },
         {
-          title: 'Items',
+          title: 'Missing/Found People',
+          url: '/dashboard/people',
+          isActive: false,
+        },
+        {
+          title: 'Lost/Found Items',
           url: '/dashboard/items',
           isActive: false,
         },
         {
-          title: 'Claims',
+          title: 'User Claims',
           url: '/dashboard/claims',
           isActive: false,
         },

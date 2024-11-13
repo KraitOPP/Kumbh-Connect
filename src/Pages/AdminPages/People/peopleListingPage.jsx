@@ -1,19 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
-import ItemsTable from './ItemsTable';
+import PeopleTable from './PeopleTable';
 import axios from 'axios';
 import { toast } from '@/components/ui/use-toast';
 import { useSearchParams } from 'react-router-dom';
-import { useDeleteItemMutation } from '@/slices/itemSlice';
+import { useDeletePersonMutation } from '@/slices/personSlice';
 
-export default function ItemsListingPage() {
+export default function PeopleListingPage() {
     const [searchParams] = useSearchParams();
-    const [items, setItems] = useState([]);
-    const [totalItems, setTotalItems] = useState(0);
+    const [people, setPeople] = useState([]);
+    const [totalPeople, setTotalPeople] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
-    const [isLoading, setIsLoading] = useState(false);
-    const [deleteItem, {isLoading: isDeleting}] = useDeleteItemMutation();
+    const [deletePerson, {isLoading: isDeleting}] = useDeletePersonMutation();
 
     const getQueryParams = useCallback(() => {
         const page = parseInt(searchParams.get('page') || '1', 10);
@@ -25,32 +24,31 @@ export default function ItemsListingPage() {
 
     const handleDeleteItem = async (itemId) => {
         try {
-            const res = await deleteItem(itemId).unwrap();
-            fetchItems();
+            const res = await deletePerson(itemId).unwrap();
+            fetchPeople();
             if (res.success) {
                 toast({
-                    title: "Item Deleted Succesfully",
+                    title: "Person Report Deleted Succesfully",
                 });
             } else {
                 toast({
-                    title: "Failed to Delete Item",
+                    title: "Failed to Delete Person Report",
                     description: res.message,
                     variant: "destructive",
                 });
             }
         } catch (error) {
             toast({
-                title: "Failed to Delete Item",
+                title: "Failed to Delete Person Report",
                 description: error?.data?.message || "An unexpected error occurred.",
                 variant: "destructive",
             });
         }
     }
 
-    const fetchItems = useCallback(async () => {
-        setIsLoading(true);
+    const fetchPeople = useCallback(async () => {
         try {
-            const response = await axios.get('http://localhost:8001/api/item/q/', {
+            const response = await axios.get('http://localhost:8001/api/person/q/', {
                 params: getQueryParams(),
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -59,13 +57,13 @@ export default function ItemsListingPage() {
             });
 
             if (response.data.success) {
-                const itemsWithRefresh = response.data.items.map(item => ({
+                const peopleWithRefresh = response.data.persons.map(item => ({
                     ...item,
-                    refreshData: fetchItems,
-                    deleteItem: handleDeleteItem
+                    refreshData: fetchPeople,
+                    deletePerson: handleDeleteItem
                 }));
-                setItems(itemsWithRefresh);
-                setTotalItems(response.data.totalItems);
+                setPeople(peopleWithRefresh);
+                setTotalPeople(response.data.totalPersons);
                 setTotalPages(response.data.totalPages);
             }
         } catch (error) {
@@ -73,27 +71,25 @@ export default function ItemsListingPage() {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: "Failed to fetch items. Please try again."
+                description: "Failed to fetch Peoples. Please try again."
             });
-        } finally {
-            setIsLoading(false);
         }
     }, [getQueryParams]);
 
     useEffect(() => {
-        fetchItems();
-    }, [searchParams, fetchItems]);
+        fetchPeople();
+    }, [searchParams, fetchPeople]);
 
     return (
         <div className="space-y-4 m-5">
             <div className="flex items-start justify-between">
                 <Heading
-                    title={`Reports (${totalItems})`}
-                    description="Manage Reported Lost/Found Items"
+                    title={`Reports (${totalPeople})`}
+                    description="Manage Reported Missing/Found People"
                 />
             </div>
             <Separator />
-            <ItemsTable data={items} totalData={totalPages}/>
+            <PeopleTable data={people} totalData={totalPages}/>
         </div>
     );
 }
