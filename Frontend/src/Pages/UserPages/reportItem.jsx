@@ -92,7 +92,7 @@ export default function ReportItemPage() {
             const res = await reportItem(data).unwrap();
             if (res.success) {
                 toast({ title: "Success!", description: "Item reported successfully" });
-                navigate("/", { replace: true });
+                navigate("/menu", { replace: true });
             }
         } catch (error) {
             toast({

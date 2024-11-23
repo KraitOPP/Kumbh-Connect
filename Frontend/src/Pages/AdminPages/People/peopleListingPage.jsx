@@ -6,6 +6,7 @@ import axios from 'axios';
 import { toast } from '@/components/ui/use-toast';
 import { useSearchParams } from 'react-router-dom';
 import { useDeletePersonMutation } from '@/slices/personSlice';
+import { Loader2 } from 'lucide-react';
 const SERVER_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function PeopleListingPage() {
@@ -13,6 +14,7 @@ export default function PeopleListingPage() {
     const [people, setPeople] = useState([]);
     const [totalPeople, setTotalPeople] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [loading, setLoading] = useState(true);
     const [deletePerson, {isLoading: isDeleting}] = useDeletePersonMutation();
 
     const getQueryParams = useCallback(() => {
@@ -48,6 +50,7 @@ export default function PeopleListingPage() {
     }
 
     const fetchPeople = useCallback(async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`${SERVER_URL}/api/person/q/`, {
                 params: getQueryParams(),
@@ -73,7 +76,9 @@ export default function PeopleListingPage() {
                 variant: "destructive",
                 title: "Error",
                 description: "Failed to fetch Peoples. Please try again."
-            });
+            })    
+        } finally {
+            setLoading(false);
         }
     }, [getQueryParams]);
 

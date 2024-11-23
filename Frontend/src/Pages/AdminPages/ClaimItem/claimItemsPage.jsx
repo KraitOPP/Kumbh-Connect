@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import ClaimsTable from './ClaimItemsTable';
 import axios from 'axios';
 import { toast } from '@/components/ui/use-toast';
+import { Loader2 } from 'lucide-react';
 const SERVER_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function ClaimItemsListingPage() {
@@ -56,6 +57,7 @@ export default function ClaimItemsListingPage() {
     useEffect(() => {
         fetchClaims();
     }, [searchParams, fetchClaims]);
+
 
     return (
         <div className="space-y-4 m-5">

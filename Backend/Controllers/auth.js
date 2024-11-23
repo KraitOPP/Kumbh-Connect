@@ -21,9 +21,9 @@ const userSchemaValidate = z.object({
     email: z
         .string({required_error: "Email is required"})
         .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,{message:"Invalid Email Address."}),
-    password: z
-        .string({required_error:"Password is Required."})
-        .min(8, {message:"Password must be atleast of 8 length"})
+    password: z.
+        string({required_error:"Password is Required."})
+        .regex(/^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])(.{8,})$/, {message:"Password must be at least 8 characters long, include an uppercase letter and a special character"})
 });
 
 const verificationCodeValidate = z.object({

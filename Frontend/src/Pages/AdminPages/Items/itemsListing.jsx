@@ -6,6 +6,7 @@ import axios from 'axios';
 import { toast } from '@/components/ui/use-toast';
 import { useSearchParams } from 'react-router-dom';
 import { useDeleteItemMutation } from '@/slices/itemSlice';
+import { Loader2 } from 'lucide-react';
 const SERVER_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function ItemsListingPage() {
@@ -13,8 +14,8 @@ export default function ItemsListingPage() {
     const [items, setItems] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
-    const [isLoading, setIsLoading] = useState(false);
     const [deleteItem, {isLoading: isDeleting}] = useDeleteItemMutation();
+    const [isLoading, setIsLoading] = useState(false);
 
     const getQueryParams = useCallback(() => {
         const page = parseInt(searchParams.get('page') || '1', 10);
@@ -84,6 +85,7 @@ export default function ItemsListingPage() {
     useEffect(() => {
         fetchItems();
     }, [searchParams, fetchItems]);
+
 
     return (
         <div className="space-y-4 m-5">

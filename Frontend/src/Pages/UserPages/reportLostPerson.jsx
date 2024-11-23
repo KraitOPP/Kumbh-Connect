@@ -152,7 +152,7 @@ export default function ReportLostPersonPage() {
             const res = await reportPerson(data).unwrap();
             if (res.success) {
                 toast({ title: "Success!", description: "Person reported successfully" });
-                navigate("/", { replace: true });
+                navigate("/menu", { replace: true });
             }
         } catch (error) {
             toast({

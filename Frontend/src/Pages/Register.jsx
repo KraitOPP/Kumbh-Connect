@@ -26,9 +26,9 @@ const registerFormSchema = z.object({
     phoneNumber: z
         .string({required_error: "Mobile Number is required"})
         .regex(/^[6-9]\d{9}$/,{message:"Invalid Mobile Number."}),
-    password: z
-        .string()
-        .min(8, { message: "Password must be atleast 8 length" })
+        password: z.
+            string({required_error:"Password is Required."})
+            .regex(/^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])(.{8,})$/, {message:"Password must be at least 8 characters long, include an uppercase letter and a special character"})
 });
 
 export const RegisterPage = () => {

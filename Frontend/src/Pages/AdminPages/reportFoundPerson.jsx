@@ -118,7 +118,7 @@ export default function ReportFoundPersonPage() {
             const res = await reportPerson(formData).unwrap();
             if (res.success) {
                 toast({ title: "Success!", description: "Person reported successfully" });
-                navigate("/", { replace: true });
+                navigate("/menu", { replace: true });
             }
         } catch (error) {
             toast({

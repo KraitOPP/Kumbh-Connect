@@ -22,12 +22,12 @@ const forgetPassSchema = z.object({
     email: z
         .string()
         .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, { message: "Invalid Email Address." }),
-    password: z
-        .string()
-        .min(8, { message: "Password must be at least 8 characters long" }),
+        password: z.
+        string({required_error:"Password is Required."})
+        .regex(/^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])(.{8,})$/, {message:"Password must be at least 8 characters long, include an uppercase letter and a special character"}),
     verifyCode: z
-        .string({ required_error: "Verification Code is required" })
-        .length(6, { message: "Verification Code must be of 6 length." }),
+            .string({ required_error: "Verification Code is required" })
+            .length(6, { message: "Verification Code must be of 6 length." }),
 });
 
 export default function ForgetPasswordPage() {

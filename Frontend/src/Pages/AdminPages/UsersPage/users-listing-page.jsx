@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import UsersTable from './usersTable.jsx';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 const SERVER_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function UsersListingPage() {
@@ -51,9 +52,6 @@ export default function UsersListingPage() {
     fetchUsers();
   }, [searchParams, fetchUsers]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="space-y-4 m-5">
