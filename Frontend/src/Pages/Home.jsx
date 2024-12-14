@@ -133,7 +133,6 @@ const HeroSection = () => {
   );
 };
 
-// Skeleton Loading Components
 const PersonCardSkeleton = () => (
   <Card className="overflow-hidden animate-pulse">
     <CardHeader className="space-y-0 pb-4">
@@ -258,7 +257,6 @@ const HomePage = ({ className }) => {
                 "shadow-sm"
               )}
             >
-              {/* Display first image if available, otherwise show placeholder */}
               {images && images.length > 0 ? (
                 <img
                   src={images[0].url}
@@ -291,7 +289,6 @@ const HomePage = ({ className }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section with Meteors */}
       <HeroSection />
 
 

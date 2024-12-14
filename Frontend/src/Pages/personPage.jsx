@@ -17,58 +17,77 @@ import { motion } from "framer-motion";
 import MapComponent from "@/components/map";
 import 'react-photo-view/dist/react-photo-view.css';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { StyledPlaceholder } from "@/components/ui/styledPlaceholder";
 
 const ImageGallery = ({ images, currentIndex, onImageSelect, imageLoading, setImageLoading }) => (
-  <motion.div 
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="grid gap-4"
-  >
-    <div className="pl-2 pt-2 flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-      {images.map((image, index) => (
-        <motion.button
-          key={index}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => onImageSelect(index)}
-          className={`flex-shrink-0 transition-all duration-200 rounded-lg overflow-hidden ${
-            currentIndex === index 
-              ? 'ring-2 ring-primary ring-offset-2'
-              : 'hover:opacity-80'
-          }`}
-        >
-          <img
-            src={image.url || '/api/placeholder/100/100'}
-            alt={`Photo ${index + 1}`}
-            className="h-16 w-16 object-cover"
-          />
-        </motion.button>
-      ))}
-    </div>
-
-    <div className="relative rounded-xl overflow-hidden bg-gray-100 shadow-lg">
-      {imageLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80 backdrop-blur-sm">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      )}
-      <PhotoView src={images[currentIndex]?.url || '/api/placeholder/600/600'}>
-        <AspectRatio ratio={1}>
-          <img
-            src={images[currentIndex]?.url || '/api/placeholder/600/600'}
-            alt="Person photo"
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
-              imageLoading ? 'opacity-0' : 'opacity-100'
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="grid gap-4"
+    >
+      <div className="pl-2 pt-2 flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        {images.map((image, index) => (
+          <motion.button
+            key={index}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              if (currentIndex !== index) {
+                setImageLoading(true);
+                onImageSelect(index);
+              }
+            }}
+            className={`flex-shrink-0 transition-all duration-200 rounded-lg overflow-hidden ${
+              currentIndex === index
+                ? 'ring-2 ring-primary ring-offset-2'
+                : 'hover:opacity-80'
             }`}
-            onLoad={() => setImageLoading(false)}
-            onError={() => setImageLoading(false)}
-          />
-        </AspectRatio>
-      </PhotoView>
-    </div>
-  </motion.div>
-);
-
+          >
+            {image.url ? (
+              <img
+                src={image.url}
+                alt={`Thumbnail ${index + 1}`}
+                className="h-16 w-16 object-cover"
+              />
+            ) : (
+              <div className="h-16 w-16">
+                <StyledPlaceholder />
+              </div>
+            )}
+          </motion.button>
+        ))}
+      </div>
+  
+      <div className="relative rounded-xl overflow-hidden bg-gray-100 shadow-lg">
+        {imageLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80 backdrop-blur-sm">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        )}
+        <PhotoView src={images[currentIndex]?.url}>
+          <AspectRatio ratio={1}>
+            {images[currentIndex]?.url ? (
+              <img
+                src={images[currentIndex].url}
+                alt="Main product view"
+                className={`w-full h-full object-cover transition-opacity duration-300 ${
+                  imageLoading ? 'opacity-0' : 'opacity-100'
+                }`}
+                onLoad={() => setImageLoading(false)}
+                onError={() => setImageLoading(false)}
+              />
+            ) : (
+              <StyledPlaceholder className={`transition-opacity duration-300 ${
+                imageLoading ? 'opacity-0' : 'opacity-100'
+              }`} />
+            )}
+          </AspectRatio>
+        </PhotoView>
+      </div>
+    </motion.div>
+  );
+  
+  
 const DetailsCard = ({ person }) => {
     const formatDate = (date) => new Date(date).toLocaleDateString();
 

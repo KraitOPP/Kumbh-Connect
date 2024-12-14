@@ -4,21 +4,31 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, User, AlertTriangle } from "lucide-react";
+import { StyledPlaceholder } from './ui/styledPlaceholder';
 
 const PersonCard = ({ person }) => {
   const formatDate = (date) => new Date(date).toLocaleDateString();
-  
+  const hasValidImage = person?.images?.[0]?.url;
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 w-full max-w-sm">
       <CardContent className="p-0">
         <div className="relative">
-          <img
-            src={person.images[0]?.url || "/api/placeholder/400/300"}
-            alt={person.name}
-            className="w-full h-48 object-cover"
-          />
+          <div className="aspect-video overflow-hidden">
+            {hasValidImage ? (
+              <img
+                src={person.images[0].url}
+                alt={person.name}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            ) : (
+              <div className="w-full h-full transition-transform duration-300 group-hover:scale-105">
+                <StyledPlaceholder />
+              </div>
+            )}
+          </div>
           <div className="absolute top-2 right-2">
-            <Badge 
+            <Badge
               variant={person.status === 'lost' ? 'destructive' : 'secondary'}
               className="font-semibold"
             >
@@ -26,7 +36,7 @@ const PersonCard = ({ person }) => {
             </Badge>
           </div>
         </div>
-        
+
         <div className="p-4 space-y-4">
           <div>
             <h3 className="text-lg font-semibold line-clamp-1 flex items-center gap-2">
