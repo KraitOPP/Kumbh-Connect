@@ -12,6 +12,7 @@ const userRouter = require('./Routes/user');
 const claimItemRouter = require('./Routes/claimItem');
 const storeRouter = require('./Routes/store');
 const personRouter = require('./Routes/person');
+const recentActivitiesRouter = require('./Routes/recentActivities');
 
 app.use(cors({
     origin: true,
@@ -41,6 +42,7 @@ app.use("/api/item/",ItemRouter);
 app.use("/api/claim/",claimItemRouter);
 app.use("/api/store/",storeRouter);
 app.use("/api/person/",personRouter);
+app.use("/api/activities/",recentActivitiesRouter);
 
 app.get('/',(req,res)=>{
     return res.send("Server is  Running");

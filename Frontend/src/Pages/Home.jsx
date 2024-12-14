@@ -4,13 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Phone, MapPin, AlertTriangle, Eye, Calendar, Search, Award, Users, Clock, CheckCircle2, Package, AlertCircle, Clipboard } from 'lucide-react';
+import {
+  Phone, MapPin, AlertTriangle, Eye, Calendar, Search,
+  Award, Users, Clock, CheckCircle2, Package,
+  AlertCircle, Clipboard, Loader2
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Meteors from "@/components/ui/meteors";
 import { AnimatedList } from '@/components/ui/animated-list';
 import { Link } from 'react-router-dom';
 import { ImageCarousel } from '@/components/ImageCarousel';
 import Particles from '@/components/ui/particles';
+import { useGetRecentActivitiesQuery } from '@/slices/activitiesApiSlice';
 
 const HeroSection = () => {
   const features = [
@@ -34,7 +39,7 @@ const HeroSection = () => {
   return (
     <div className="relative h-screen flex items-center justify-center bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
       <Meteors number={30} />
-      
+
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -56,7 +61,7 @@ const HeroSection = () => {
             >
               <span className="text-sm font-medium">Kumbh Connect Lost & Found Service</span>
             </motion.div>
-            
+
             <motion.h1
               className="text-6xl p-3 font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-white"
               initial={{ opacity: 0 }}
@@ -66,7 +71,7 @@ const HeroSection = () => {
               Reuniting People at
               <br /> महाकुम्भ 2025
             </motion.h1>
-            
+
             <motion.p
               className="text-xl mb-8 text-gray-300"
               initial={{ opacity: 0 }}
@@ -128,7 +133,48 @@ const HeroSection = () => {
   );
 };
 
+// Skeleton Loading Components
+const PersonCardSkeleton = () => (
+  <Card className="overflow-hidden animate-pulse">
+    <CardHeader className="space-y-0 pb-4">
+      <div className="flex items-center space-x-4">
+        <div className="h-16 w-16 bg-gray-300 rounded-full"></div>
+        <div className="flex-1 space-y-2">
+          <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+          <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+        </div>
+      </div>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-2">
+        <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+        <div className="h-3 bg-gray-300 rounded w-full"></div>
+        <div className="h-3 bg-gray-300 rounded w-full"></div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const ItemNotificationSkeleton = () => (
+  <motion.div
+    className="relative mx-auto min-h-fit w-full max-w-[400px] bg-white/95 rounded-2xl p-4 animate-pulse"
+  >
+    <div className="flex flex-row items-center gap-4">
+      <div className="h-12 w-12 bg-gray-300 rounded-xl"></div>
+      <div className="flex-1 space-y-2">
+        <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+        <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+      </div>
+    </div>
+  </motion.div>
+);
+
 const HomePage = ({ className }) => {
+  const { data, isLoading, error } = useGetRecentActivitiesQuery();
+
+  const missingPersons = data?.recentPeople || [];
+  const foundItems = data?.recentItems || [];
+
   const images = [
     "https://cdnbbsr.s3waas.gov.in/s3cd4bb35c75ba84b4f39e547b1416fd35/uploads/2021/07/2021071340.jpg",
     "https://cdnbbsr.s3waas.gov.in/s3cd4bb35c75ba84b4f39e547b1416fd35/uploads/2021/07/2021071384.jpg",
@@ -139,87 +185,6 @@ const HomePage = ({ className }) => {
     "https://cdn.pixabay.com/photo/2019/03/18/17/07/pragraj-4063557_1280.jpg",
     "https://cdn.pixabay.com/photo/2021/01/17/10/43/ganges-5924565_1280.jpg",
     "https://cdn.pixabay.com/photo/2023/06/10/05/28/ganga-pooja-8053190_1280.jpg"
-  ];
-
-  const missingPersons = [
-    {
-      name: "Ramesh Kumar",
-      age: 65,
-      location: "Triveni Sangam",
-      lastSeen: "2024-03-15 14:30",
-      description: "Elderly man wearing orange dhoti and kurta, speaks Hindi",
-      priority: "HIGH",
-      image: "/api/placeholder/64/64"
-    },
-    {
-      name: "Priya Singh",
-      age: 28,
-      location: "Sector 4 Camp",
-      lastSeen: "2024-03-16 09:15",
-      description: "Young woman in blue saree, carrying a small bag",
-      priority: "HIGH",
-      image: "/api/placeholder/64/64"
-    },
-    {
-      name: "Arjun Patel",
-      age: 45,
-      location: "Ram Ghat",
-      lastSeen: "2024-03-16 11:30",
-      description: "Middle-aged man in white kurta, wearing glasses",
-      priority: "MEDIUM",
-      image: "/api/placeholder/64/64"
-    }
-  ];
-
-  const foundItems = [
-    {
-      name: "Gold Bracelet",
-      location: "Near Akshardham Temple",
-      description: "Valuable gold bracelet found on the ground",
-      icon: "💍",
-      color: "#1E86FF",
-      time: "2024-05-20 10:00",
-    },
-    {
-      name: "Blue Backpack",
-      location: "Sector 9",
-      description: "Backpack containing personal belongings found on a bench",
-      icon: "🎒",
-      color: "#1E86FF",
-      time: "2024-06-15 14:30",
-    },
-    {
-      name: "Blue Backpack",
-      location: "Sector 9",
-      description: "Backpack containing personal belongings found on a bench",
-      icon: "🎒",
-      color: "#1E86FF",
-      time: "2024-06-15 14:30",
-    },
-    {
-      name: "Blue Backpack",
-      location: "Sector 9",
-      description: "Backpack containing personal belongings found on a bench",
-      icon: "🎒",
-      color: "#1E86FF",
-      time: "2024-06-15 14:30",
-    },
-    {
-      name: "Blue Backpack",
-      location: "Sector 9",
-      description: "Backpack containing personal belongings found on a bench",
-      icon: "🎒",
-      color: "#1E86FF",
-      time: "2024-06-15 14:30",
-    },
-    {
-      name: "Blue Backpack",
-      location: "Sector 9",
-      description: "Backpack containing personal belongings found on a bench",
-      icon: "🎒",
-      color: "#1E86FF",
-      time: "2024-06-15 14:30",
-    },
   ];
 
   const achievements = [
@@ -267,7 +232,8 @@ const HomePage = ({ className }) => {
     }
   ];
 
-  const Notification = ({ name, description, icon, color, time }) => {
+
+  const Notification = ({ name, description, images, reportedBy, dateReported, _id }) => {
     return (
       <motion.figure
         initial={{ opacity: 0, y: 20 }}
@@ -283,38 +249,42 @@ const HomePage = ({ className }) => {
           "transform-gpu"
         )}
       >
-        <div className="flex flex-row items-center gap-4">
-          <div
-            className={cn(
-              "flex size-12 items-center justify-center rounded-xl",
-              "transition-transform duration-300 group-hover:scale-110",
-              "shadow-sm"
-            )}
-            style={{
-              backgroundColor: color,
-            }}
-          >
-            <span className="text-xl text-white">{icon}</span>
-          </div>
-          <div className="flex flex-col flex-1 overflow-hidden min-w-0">
-            <div className="flex items-center space-x-2 mb-1">
-              <span className="text-base font-semibold text-gray-900 dark:text-white truncate">
-                {name}
-              </span>
-              <span className="text-gray-400 dark:text-gray-500">·</span>
-              <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                {time}
-              </span>
+        <Link to={`/item/${_id}`}>
+          <div className="flex flex-row items-center gap-4">
+            <div
+              className={cn(
+                "flex size-12 items-center justify-center rounded-xl",
+                "transition-transform duration-300 group-hover:scale-110",
+                "shadow-sm"
+              )}
+            >
+              {/* Display first image if available, otherwise show placeholder */}
+              {images && images.length > 0 ? (
+                <img
+                  src={images[0].url}
+                  alt={name}
+                  className="size-12 object-contain rounded-xl"
+                />
+              ) : (
+                <span className="text-gray-400">No Image</span>
+              )}
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
-              {description}
-            </p>
+            <div className="flex flex-col flex-1 overflow-hidden min-w-0">
+              <div className="flex items-center space-x-2 mb-1">
+                <span className="text-base font-semibold text-gray-900 dark:text-white truncate">
+                  {name}
+                </span>
+                <span className="text-gray-400 dark:text-gray-500">·</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                  {dateReported}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                {description}
+              </p>
+            </div>
           </div>
-        </div>
-        
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
-        
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+        </Link>
       </motion.figure>
     );
   };
@@ -365,131 +335,154 @@ const HomePage = ({ className }) => {
 
       {/* Image Gallery */}
       <div className="relative container mx-auto px-4 py-16">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="text-center mb-12"
-      >
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">Mahakumbh Gallery</h2>
-        <p className="text-gray-600">Experience the divine atmosphere through our curated collection of images</p>
-      </motion.div>
-      <ImageCarousel images={images} />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white -z-10" />
-    </div>
-
-    {/* Mahakumbh Details Section */}
-      <div className="relative  container mx-auto overflow-hidden">
-      <Particles
-        className="absolute inset-0"
-        quantity={100}
-        ease={80}
-        color={"#000000"}
-        refresh
-      />
-      
-      <div className="container relative mx-auto px-4 py-16 z-10">
-        <div className="text-center mb-12">
-          <h2 className="text-6xl font-bold mb-4 bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent">
-            Mahakumbh 2025
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Join millions in the sacred gathering at Prayagraj
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8">
-          <Card className="bg-background/80 backdrop-blur-sm border-muted">
-            <CardHeader>
-              <CardTitle className="text-2xl">About Mahakumbh 2025</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                The Mahakumbh is a sacred Hindu festival that takes place every 12 years in Prayagraj, Uttar Pradesh, India. The next Mahakumbh is scheduled to be held in 2025, where millions of pilgrims are expected to gather for the auspicious event.
-              </p>
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center text-muted-foreground">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  Prayagraj, Uttar Pradesh
-                </div>
-                <div className="flex items-center text-muted-foreground">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  January - March 2025
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-background/80 backdrop-blur-sm border-muted">
-            <CardHeader>
-              <CardTitle className="text-2xl">Lost & Found Application</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Our dedicated application helps reunite lost individuals and recover misplaced items during the Mahakumbh gathering. Report missing persons or found items, and we'll assist in connecting you with the rightful owners.
-              </p>
-              <div className="flex flex-wrap items-center gap-4">
-                <Link to="/report/person">
-                  <Button
-                    variant="outline"
-                    className="hover:bg-primary/10"
-                  >
-                    <AlertTriangle className="w-4 h-4 mr-2" />
-                    Report Missing Person
-                  </Button>
-                </Link>
-                <Link to="/report/item">
-                  <Button
-                    variant="outline"
-                    className="hover:bg-primary/10"
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    Report Found Item
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Mahakumbh Gallery</h2>
+          <p className="text-gray-600">Experience the divine atmosphere through our curated collection of images</p>
+        </motion.div>
+        <ImageCarousel images={images} />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white -z-10" />
       </div>
-    </div>
 
-      {/* Missing Persons Details */}
-      <section className="container mx-auto px-4 py-16 bg-gray-50">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Priority Missing Persons</h2>
-          <p className="text-gray-600">Please help us locate these individuals. Contact emergency helpline if found.</p>
-        </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {missingPersons.map((person, index) => (
-            <Card key={index} className="overflow-hidden">
-              <CardHeader className="space-y-0 pb-4">
-                <div className="flex items-center space-x-4">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={person.image} alt={person.name} />
-                    <AvatarFallback>{person.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <CardTitle className="text-xl">{person.name}</CardTitle>
-                    <p className="text-sm text-gray-500">Age: {person.age}</p>
-                  </div>
-                </div>
+      {/* Mahakumbh Details Section */}
+      <div className="relative  container mx-auto overflow-hidden">
+        <Particles
+          className="absolute inset-0"
+          quantity={100}
+          ease={80}
+          color={"#000000"}
+          refresh
+        />
+
+        <div className="container relative mx-auto px-4 py-16 z-10">
+          <div className="text-center mb-12">
+            <h2 className="text-6xl font-bold mb-4 bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent">
+              Mahakumbh 2025
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Join millions in the sacred gathering at Prayagraj
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <Card className="bg-background/80 backdrop-blur-sm border-muted">
+              <CardHeader>
+                <CardTitle className="text-2xl">About Mahakumbh 2025</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <Badge variant={person.priority === 'HIGH' ? 'destructive' : 'secondary'}>
-                    {person.priority} PRIORITY
-                  </Badge>
-                  <p className="text-sm text-gray-600">{person.description}</p>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <AlertTriangle className="h-4 w-4 mr-2 text-red-500" />
-                    Last seen: {person.lastSeen} at {person.location}
+                <p className="text-muted-foreground mb-4">
+                  The Mahakumbh is a sacred Hindu festival that takes place every 12 years in Prayagraj, Uttar Pradesh, India. The next Mahakumbh is scheduled to be held in 2025, where millions of pilgrims are expected to gather for the auspicious event.
+                </p>
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="flex items-center text-muted-foreground">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    Prayagraj, Uttar Pradesh
+                  </div>
+                  <div className="flex items-center text-muted-foreground">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    January - March 2025
                   </div>
                 </div>
               </CardContent>
             </Card>
-          ))}
+
+            <Card className="bg-background/80 backdrop-blur-sm border-muted">
+              <CardHeader>
+                <CardTitle className="text-2xl">Lost & Found Application</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-4">
+                  Our dedicated application helps reunite lost individuals and recover misplaced items during the Mahakumbh gathering. Report missing persons or found items, and we'll assist in connecting you with the rightful owners.
+                </p>
+                <div className="flex flex-wrap items-center gap-4">
+                  <Link to="/report/person">
+                    <Button
+                      variant="outline"
+                      className="hover:bg-primary/10"
+                    >
+                      <AlertTriangle className="w-4 h-4 mr-2" />
+                      Report Missing Person
+                    </Button>
+                  </Link>
+                  <Link to="/report/item">
+                    <Button
+                      variant="outline"
+                      className="hover:bg-primary/10"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Report Found Item
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
+      </div>
+
+      <section className="container mx-auto px-4 py-16 bg-gray-50">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            {isLoading ? 'Loading Missing Persons...' : 'Missing/Found Persons'}
+          </h2>
+          <p className="text-gray-600">Please help us locate these individuals. Contact emergency helpline if found.</p>
+        </div>
+        {isLoading ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((_, index) => (
+              <PersonCardSkeleton key={index} />
+            ))}
+          </div>
+        ) : error ? (
+          <div className="text-red-500 text-center py-8">
+            <AlertCircle className="mx-auto h-12 w-12 mb-4" />
+            <p>Unable to load missing persons. Please try again later.</p>
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {missingPersons.map((person, index) => (
+              <Card key={index} className="overflow-hidden">
+                <CardHeader className="space-y-0 pb-4">
+                  <div className="flex items-center space-x-4">
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage
+                        src={person?.images && person.images.length > 0 ? person.images[0].url : undefined}
+                        alt={person.name}
+                        className="object-cover"
+                      />
+                      <AvatarFallback>{person.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <CardTitle className="text-xl">{person.name}</CardTitle>
+                      <p className="text-sm text-gray-500">Age: {person.age}</p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Badge variant={person.status === 'LOST' ? 'destructive' : 'secondary'}>
+                      {person.status.toUpperCase()}
+                    </Badge>
+                    <p className="text-sm text-gray-600">{person.description}</p>
+                    <div className="flex items-center text-sm text-gray-500">
+                      <AlertTriangle className="h-4 w-4 mr-2 text-red-500" />
+                      Date Reported: {person.dateReported}
+                    </div>
+                    <Link to={`/person/${person._id}`}>
+                      <Button className="mt-2 bg-transparent text-gray-700 font-bold border-slate-400 border-s-2 hover:bg-primary/10">
+                        More Detail
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Found Items Section */}
@@ -499,13 +492,28 @@ const HomePage = ({ className }) => {
           className
         )}
       >
-       <h2 className="text-3xl font-bold text-gray-900 mb-2">Recent Lost/Found Items</h2>
-       <p className="text-gray-600 mb-5">Kindly Collect Your Lost Belongings from our Centers.</p>
-        <AnimatedList>
-          {foundItems.map((item, idx) => (
-            <Notification {...item} key={idx} />
-          ))}
-        </AnimatedList>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          {isLoading ? 'Loading Recent Items...' : 'Recent Lost/Found Items'}
+        </h2>
+        <p className="text-gray-600 mb-5">Kindly Collect Your Lost Belongings from our Centers.</p>
+        {isLoading ? (
+          <AnimatedList>
+            {[1, 2, 3].map((_, index) => (
+              <ItemNotificationSkeleton key={index} />
+            ))}
+          </AnimatedList>
+        ) : error ? (
+          <div className="text-red-500 text-center py-8">
+            <AlertCircle className="mx-auto h-12 w-12 mb-4" />
+            <p>Unable to load recent items. Please try again later.</p>
+          </div>
+        ) : (
+          <AnimatedList>
+            {foundItems.map((item, idx) => (
+              <Notification {...item} key={idx} />
+            ))}
+          </AnimatedList>
+        )}
       </div>
 
       {/* Why Choose Us Section */}
@@ -554,7 +562,7 @@ const HomePage = ({ className }) => {
           </Card>
         </div>
       </div>
-      
+
       {/* Achievements Section */}
       <section className="bg-gray-900 text-white py-16">
         <div className="container mx-auto px-4">
