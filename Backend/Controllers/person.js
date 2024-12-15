@@ -46,11 +46,6 @@ const personSchemaValidate = z.object({
                 .string({ required_error: "Guardian Postal Code is required" }),
         }),
     }).optional(),
-    images: z.array(
-        z.object({
-            url: z.string({ required_error: "Image URL is required" }),
-        }),
-    ),
     status: z.enum(['lost', 'found', 'returned'], {
         required_error: "Item Status is required",
         invalid_type_error: "Invalid Item Status",
@@ -69,7 +64,7 @@ const mongooseIdVerify = z.string().regex(/^[0-9a-fA-F]{24}$/, { message: "Inval
 
 const handleReportLost = async (req, res) => {
     try {
-        const { name, description, age, guardian, location, images } = req.body;
+        const { name, description, age, guardian, location } = req.body;
         const reportedBy = req.user._id.toString();
         if (!reportedBy) {
             return res.status(401).json({
@@ -81,21 +76,25 @@ const handleReportLost = async (req, res) => {
         const validate = personSchemaValidate.safeParse({
             name,
             description,
-            age,
-            guardian,
-            location,
-            images,
+            age: Number(age),
+            guardian: JSON.parse(guardian),
+            location: JSON.parse(location),
             status: "lost",
             reportedBy,
         });
 
         if (validate.success) {
+            const images = req.files.map((file) =>{
+                return {
+                    url: file.path
+                }
+            });
             const person = new Person({
                 name,
                 description,
-                age,
-                guardian,
-                location,
+                age: Number(age),
+                guardian: JSON.parse(guardian),
+                location: JSON.parse(location),
                 images,
                 status: "lost",
                 reportedBy,
@@ -124,9 +123,9 @@ const handleReportLost = async (req, res) => {
 
 const handleReportFound = async (req, res) => {
     try {
-        const { name, description, age, centre, images } = req.body;
+        const { name, description, age, centre } = req.body;
         const reportedBy = req.user._id.toString();
-        const centerDetails = await Store.findById(centre);
+        const centerDetails = await Store.findById(JSON.parse(centre));
         if (!reportedBy || !centerDetails) {
             return res.status(401).json({
                 success: false,
@@ -137,20 +136,23 @@ const handleReportFound = async (req, res) => {
         const validate = personSchemaValidate.safeParse({
             name,
             description,
-            age,
+            age: Number(age),
             location: { longitude: centerDetails.longitude, latitude: centerDetails.latitude},
-            centre,
-            images,
             status: "found",
             reportedBy,
         });
 
         if (validate.success) {
+            const images = req.files.map((file) =>{
+                return {
+                    url: file.path
+                }
+            });
             const person = new Person({
                 name,
                 description,
-                age,
-                centre,
+                age: Number(age),
+                centre: JSON.parse(centre),
                 location: { longitude: centerDetails.longitude, latitude: centerDetails.latitude},
                 images,
                 status: "found",

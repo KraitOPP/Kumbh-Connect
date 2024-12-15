@@ -154,7 +154,7 @@ const ClaimPage = () => {
                             </div>
                             <div>
                                 <CardDescription>Address</CardDescription>
-                                <p>{claim.claimBy.address.street}, {claim.claimBy.address.city}, {claim.claimBy.address.state}, {claim.claimBy.address.country} {claim.claimBy.address.postalCode}</p>
+                                <p>{claim.claimBy.address?.street}, {claim.claimBy.address?.city}, {claim.claimBy.address?.state}, {claim.claimBy.address?.country} {claim.claimBy.address?.postalCode}</p>
                             </div>
                         </div>
                     </div>

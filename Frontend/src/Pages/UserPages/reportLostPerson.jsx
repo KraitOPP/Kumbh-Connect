@@ -24,6 +24,7 @@ import {
     Home,
     AlertTriangle,
     ArrowRight,
+    ImageIcon,
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { useReportLostPersonMutation } from "@/slices/personSlice";
@@ -77,11 +78,16 @@ const personSchema = z.object({
                 .string({ required_error: "Guardian Postal Code is required" }),
         }),
     }),
-    images: z.array(
-        z.object({
-            url: z.string({ required_error: "Image URL is required" }),
-        }),
-    ),
+    images: z.array(z.instanceof(File))
+        .refine(
+            (files) => files.every((file) => file.type.startsWith('image/')),
+            { message: "Only image files are allowed" }
+        )
+        .refine(
+            (files) => files.every((file) => file.size <= 5 * 1024 * 1024),
+            { message: "Each image must be 5MB or smaller" }
+        )
+        .optional(),
     location: z.object({
         latitude: z.number().min(-90).max(90),
         longitude: z.number().min(-180).max(180),
@@ -112,7 +118,7 @@ const SectionTitle = ({ icon: Icon, title, urgent }) => (
 export default function ReportLostPersonPage() {
     const navigate = useNavigate();
     const [reportPerson, { isLoading: isReporting }] = useReportLostPersonMutation();
-    const [images, setImages] = useState([""]);
+    const [previewImages, setPreviewImages] = useState([]);
     const [location, setLocation] = useState({
         latitude: 25.427980726672878,
         longitude: 81.77186608292688
@@ -143,14 +149,58 @@ export default function ReportLostPersonPage() {
         },
     });
 
+    const handleImageUpload = (event) => {
+        const files = Array.from(event.target.files || []);
+
+        const validFiles = files.filter(file =>
+            file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024
+        );
+
+        const previews = validFiles.map(file => URL.createObjectURL(file));
+
+        const existingImages = form.getValues('images') || [];
+
+        const allImages = [...existingImages, ...validFiles];
+        form.setValue('images', allImages);
+
+        setPreviewImages(prevPreviews => [...prevPreviews, ...previews]);
+
+        if (validFiles.length !== files.length) {
+            toast({
+                title: "Image Upload Warning",
+                description: "Some files were skipped due to invalid type or size",
+                variant: "destructive",
+            });
+        }
+    };
+
+    const removeImage = (indexToRemove) => {
+        URL.revokeObjectURL(previewImages[indexToRemove]);
+
+        const updatedImages = form.getValues('images').filter((_, index) => index !== indexToRemove);
+        const updatedPreviews = previewImages.filter((_, index) => index !== indexToRemove);
+
+        form.setValue('images', updatedImages);
+        setPreviewImages(updatedPreviews);
+    };
+
     async function onSubmit(data) {
         try {
-            data.images = images.map((url) => ({ url: url.trim() })).filter(img => img.url);
-            data.location = location;
-            data.age = Number(data.age);
-            
-            const res = await reportPerson(data).unwrap();
+            const formData = new FormData();
+
+            formData.append('name', data.name);
+            formData.append('description', data.description);
+            formData.append('age', Number(data.age));
+            formData.append('guardian', JSON.stringify(data.guardian));
+            formData.append('location', JSON.stringify(location));
+
+            data.images.forEach((file, index) => {
+                formData.append(`images`, file);
+            });
+
+            const res = await reportPerson(formData).unwrap();
             if (res.success) {
+                previewImages.forEach(URL.revokeObjectURL);
                 toast({ title: "Success!", description: "Person reported successfully" });
                 navigate("/menu", { replace: true });
             }
@@ -372,72 +422,104 @@ export default function ReportLostPersonPage() {
                                 <Separator />
 
                                 <div className="space-y-4">
-                                        <h2 className="text-xl font-semibold flex items-center gap-2">
-                                            <div className="h-8 w-1 bg-blue-500 rounded-full" />
-                                            Images
-                                        </h2>
-                                        <div className="space-y-3">
-                                            {images.map((url, index) => (
-                                                <div key={index} className="flex gap-2">
-                                                    <Input
-                                                        type="text"
-                                                        placeholder="Enter image URL"
-                                                        className="bg-white"
-                                                        value={url}
-                                                        onChange={(e) =>
-                                                            setImages(images.map((u, i) =>
-                                                                i === index ? e.target.value : u
-                                                            ))
-                                                        }
-                                                    />
+                                    <h2 className="text-xl font-semibold flex items-center gap-2">
+                                        <div className="h-8 w-1 bg-blue-500 rounded-full" />
+                                        Images
+                                    </h2>
+                                    <div className="space-y-3">
+                                        <FormField
+                                            control={form.control}
+                                            name="images"
+                                            render={({ field: { onChange, value, ...fieldProps } }) => (
+                                                <FormItem>
+                                                    <FormLabel>Upload Images</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="file"
+                                                            multiple
+                                                            accept="image/*"
+                                                            onChange={handleImageUpload}
+                                                            className="hidden"
+                                                            id="image-upload"
+                                                            {...fieldProps}
+                                                        />
+                                                    </FormControl>
                                                     <Button
                                                         type="button"
                                                         variant="outline"
-                                                        onClick={() => setImages(images.filter((_, i) => i !== index))}
-                                                        className="shrink-0"
+                                                        className="w-full"
+                                                        onClick={() => document.getElementById('image-upload').click()}
                                                     >
-                                                        <Trash2 className="h-4 w-4 text-red-500" />
+                                                        <ImagePlus className="mr-2 h-4 w-4" />
+                                                        Add Images
                                                     </Button>
-                                                </div>
-                                            ))}
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                onClick={() => setImages([...images, ""])}
-                                                className="w-full"
-                                            >
-                                                <ImagePlus className="mr-2 h-4 w-4" />
-                                                Add Image URL
-                                            </Button>
-                                        </div>
-                                    </div>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                                    <div className="flex justify-end gap-4">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => navigate(-1)}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={isReporting}
-                                className="min-w-[140px]"
-                            >
-                                {isReporting ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Submitting...
-                                    </>
-                                ) : (
-                                    <>
-                                        Submit Report
-                                        <ArrowRight className="ml-2 h-4 w-4" />
-                                    </>
-                                )}
-                            </Button>
-                        </div>
+                                        {previewImages.length > 0 && (
+                                            <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
+                                                {previewImages.map((preview, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="relative group"
+                                                    >
+                                                        <img
+                                                            src={preview}
+                                                            alt={`Preview ${index + 1}`}
+                                                            className="w-full h-24 object-cover rounded-lg"
+                                                        />
+                                                        <Button
+                                                            type="button"
+                                                            size="icon"
+                                                            variant="destructive"
+                                                            className="absolute top-1 right-1 w-6 h-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            onClick={() => removeImage(index)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {previewImages.length === 0 && (
+                                            <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6">
+                                                <ImageIcon className="h-12 w-12 text-gray-400 mb-4" />
+                                                <p className="text-sm text-gray-500">
+                                                    No images uploaded yet
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex justify-end gap-4">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => navigate(-1)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        disabled={isReporting}
+                                        className="min-w-[140px]"
+                                    >
+                                        {isReporting ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Submitting...
+                                            </>
+                                        ) : (
+                                            <>
+                                                Submit Report
+                                                <ArrowRight className="ml-2 h-4 w-4" />
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
                             </CardContent>
                         </Card>
                     </form>

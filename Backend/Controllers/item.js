@@ -18,11 +18,6 @@ const itemSchemaValidate = z.object({
     category: z
         .string({ required_error: "Category is required" })
         .regex(/^[0-9a-fA-F]{24}$/, { message: "Invalid Category ObjectId" }),
-    images: z.array(
-        z.object({
-            url: z.string({ required_error: "Image URL is required" }),
-        }),
-    ),
     status: z.enum(['lost', 'found', 'returned'], {
         required_error: "Item Status is required",
         invalid_type_error: "Invalid Item Status",
@@ -55,9 +50,9 @@ const itemUpdateSchemaValidate = z.object({
 
 const handleAddItem = async(req,res)=>{
     try {
-        const {name, description, category, images,location, status} = req.body;
+        const {name, description, category,location, status} = req.body;
         const reportedBy = req.user._id.toString();
-        const validate = itemSchemaValidate.safeParse({name, description, category, images, status, reportedBy});
+        const validate = itemSchemaValidate.safeParse({name, description, category, status, reportedBy});
         const user = req.user;
         if(!user){
             return res.status(401).json({
@@ -66,13 +61,17 @@ const handleAddItem = async(req,res)=>{
             });
         }
         if(validate.success){
-
+            const images = req.files.map((file) =>{
+                return {
+                    url: file.path
+                }
+            });
             const item = new Item({
                 name,
                 description,
                 category,
                 images,
-                location,
+                location: JSON.parse(location),
                 status,
                 reportedBy,
             });
