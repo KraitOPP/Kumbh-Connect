@@ -25,7 +25,6 @@ import PeopleListingPage from './Pages/AdminPages/People/peopleListingPage';
 import ReportFoundPersonPage from './Pages/AdminPages/reportFoundPerson';
 import HomePage from './Pages/Home';
 import MenuPage from './Pages/Menu';
-import LoaderVerification from './loaderio';
 
 export const router = createBrowserRouter([
     {
@@ -35,10 +34,6 @@ export const router = createBrowserRouter([
     {
       path:"/",
       element: <HomePage />
-    },
-    {
-      path:"/loaderio-53a7874364a36c201c06093bdd1eb142.html",
-      element: <LoaderVerification/>
     },
     {
       path: "/menu",
