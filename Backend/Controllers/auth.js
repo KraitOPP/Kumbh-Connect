@@ -56,7 +56,7 @@ const generateToken = (userId)=>{
 };
 
 const handleSignUp = async(req,res)=>{
-    try {
+    try{
         const {firstName,lastName,email,phoneNumber,password} = req.body;
 
         const validate = userSchemaValidate.safeParse({firstName,lastName,phoneNumber,email,password});

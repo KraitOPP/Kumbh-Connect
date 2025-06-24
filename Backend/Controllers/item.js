@@ -48,57 +48,72 @@ const itemUpdateSchemaValidate = z.object({
 });
 
 
-const handleAddItem = async(req,res)=>{
+const handleAddItem = async (req, res) => {
     try {
-        const {name, description, category,location, status} = req.body;
-        const reportedBy = req.user._id.toString();
-        const validate = itemSchemaValidate.safeParse({name, description, category, status, reportedBy});
-        const user = req.user;
-        if(!user){
-            return res.status(401).json({
-                success: false,
-                message: "Invalid Request",
-            });
-        }
-        if(validate.success){
-            const images = req.files.map((file) =>{
-                return {
-                    url: file.path
-                }
-            });
-            const item = new Item({
-                name,
-                description,
-                category,
-                images,
-                location: JSON.parse(location),
-                status,
-                reportedBy,
-            });
-            await item.save();
-
-
-            return res.status(201).json({
-                success: true,
-                message: "Item Added Successfully",
-            });
-        }
-        else{
-            return res.status(400).json({
-                success: false,
-                message: validate.error.issues.map((err)=>err.message).join(", "),
-            });
-        }
-
-    } catch (error) {
-        console.error("Error Adding Item",error);
-        return res.status(500).json({
-            success:false,
-            message: "Internal Server Issue, Please try again!",
+      const { name, description, category, location, status } = req.body;
+      const reportedBy = req.user._id.toString();
+      const validate = itemSchemaValidate.safeParse({ name, description, category, status, reportedBy });
+  
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid Request",
         });
+      }
+  
+      if (validate.success) {
+        const images = req.files.map(file => ({
+          url: file.path,
+        }));
+  
+        const item = new Item({
+          name,
+          description,
+          category,
+          images,
+          location: JSON.parse(location),
+          status,
+          reportedBy,
+        });
+  
+        await item.save();
+  
+        if (status === 'lost') {
+          const foundItems = await matchLostItem({ lostItemImagePaths: images.map(img => img.url) });
+  
+          if (foundItems.length > 0) {
+            return res.status(200).json({
+              success: true,
+              message: "Item added successfully. Potential matches found.",
+              matches: foundItems,
+            });
+          } else {
+            return res.status(200).json({
+              success: true,
+              message: "Item added successfully. No matches found.",
+            });
+          }
+        }
+  
+        return res.status(201).json({
+          success: true,
+          message: "Item added successfully",
+        });
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: validate.error.issues.map((err) => err.message).join(", "),
+        });
+      }
+    } catch (error) {
+      console.error("Error Adding Item", error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Issue, Please try again!",
+      });
     }
-}
-
+  };
+  
 
 const handleUpdateItem = async (req, res) => {
     try {
@@ -710,5 +725,6 @@ const handleGetItemByQuery = async (req, res) => {
         });
     }
 };
+
 
 module.exports = {handleAddItem,handleUpdateItem, handleDeleteItem, handleUpdateItemStatus, handleGetItems, handleGetItemsByCategory, handleGetItemsOfACategory, handleGetItemofUser, handleGetItemById, handleGetItemByQuery};

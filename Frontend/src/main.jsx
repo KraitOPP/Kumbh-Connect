@@ -16,5 +16,5 @@ createRoot(document.getElementById('root')).render(
           <RouterProvider router={router} />
       </Provider>
     </NuqsAdapter>
-  </StrictMode>,
+  </StrictMode>
 )

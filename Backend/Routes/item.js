@@ -13,7 +13,7 @@ const {
     handleGetItemsOfACategory,
     handleGetItemofUser,
     handleGetItemById,
-    handleGetItemByQuery
+    handleGetItemByQuery,
 } = require("../Controllers/item");
 
 
